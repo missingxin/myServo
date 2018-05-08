@@ -1,6 +1,14 @@
-//##############################################
-//在這裡我們必須做出一個獨立但適用於P LCOpen 層的 servo Middleware
-//##############################################
+/**
+  ******************************************************************************
+  * File Name          : myServo.h
+  * Description        : Here we create a low dependency servo Middleware here, 
+  *                      which we can stake PLCOpen layer on top of.
+  ******************************************************************************
+  ** 說明：主要目標是建立一個可重覆使用在不同平台的 Servo Middleware.
+  *
+  * 
+  ******************************************************************************
+*/
 #ifndef MYSERVO_H
 #define MYSERVO_H
 #define bool unsigned char

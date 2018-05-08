@@ -1,3 +1,14 @@
+/**
+  ******************************************************************************
+  * File Name          : myServo.c
+  * Description        : Here we create a low dependency servo Middleware here, 
+  *                      which we can stake PLCOpen layer on top of.
+  ******************************************************************************
+  ** 說明：主要目標是建立一個可重覆使用在不同平台的 Servo Middleware.
+  *
+  * 
+  ******************************************************************************
+*/
 #include <string.h>
 #include "myServo.h"
 float angleLimit(float angle, float max,float min){
@@ -187,8 +198,8 @@ void MotionTypeHandler_6(SERVO *servo){
 
 //-- type switcher
 void ServoTimerCallback(SERVO *servo){
-  // 用暫存區和暫存指標的方式來解 critical section
-  // 低優先(main)填寫，高優先(int)套用受理
+  // use pending area to handle critical section
+  // low prio(main) fill the command data，high prio(int) take and apply it.
   if(servo->hasPendingJob){
     servo->hasPendingJob    = 0;
     servo->currentJobDne    = 0;

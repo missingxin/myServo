@@ -1,3 +1,15 @@
+/**
+  ******************************************************************************
+  * File Name          : myMain.c
+  * Description        : Demonstration of myServo Middleware.
+  ******************************************************************************
+  ** 說明：在STM32F03C8T6(Bluepill board)上使用 myServo Middleware 作為展示範例
+  *  使用的 servo 參數為：
+  *     period：20ms
+  *     duty cycle: 0.5ms ~ 2ms
+  *     角度：正負90度
+  ******************************************************************************
+*/
 #include "main.h"
 #include "stm32f1xx_hal.h"
 #include "tim.h"
