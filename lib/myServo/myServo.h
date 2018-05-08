@@ -13,7 +13,9 @@
 #ifndef MYSERVO_H
 #define MYSERVO_H
 /* Private typedef -----------------------------------------------------------*/
+#if !defined(bool)
 #define bool unsigned char
+#endif
 
 typedef struct{
   unsigned char workmode;
