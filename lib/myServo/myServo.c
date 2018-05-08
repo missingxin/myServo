@@ -1,16 +1,53 @@
-/**
-  ******************************************************************************
-  * File Name          : myServo.c
-  * Description        : Here we create a low dependency servo Middleware here, 
-  *                      which we can stake PLCOpen layer on top of.
-  ******************************************************************************
-  ** 說明：主要目標是建立一個可重覆使用在不同平台的 Servo Middleware.
-  *
-  * 
-  ******************************************************************************
-*/
+/*******************************************************************************
+* File Name          : myServo.c
+* Author             : Joseph Lin
+* Version            : V0.0.1
+* Date               : 05/8/2018
+* Description        : Here we create a low dependency servo Middleware here, 
+*                      which we can stake PLCOpen layer on top of.
+********************************************************************************
+* 說明：主要目標是建立一個可重覆使用在不同平台的 Servo Middleware.
+*******************************************************************************/
+
+/* Includes ------------------------------------------------------------------*/
 #include <string.h>
 #include "myServo.h"
+
+/* Private typedef -----------------------------------------------------------*/
+/* Private define ------------------------------------------------------------*/
+/* Private macro -------------------------------------------------------------*/
+/* Private variables ---------------------------------------------------------*/
+/* Private function prototypes -----------------------------------------------*/
+/*******************************************************************************
+* Function Name  : angleLimit
+* Description    : 用以限制定定角度在可用範圍內
+* Input          : @float angle
+*                  @loat max
+*                  @float min
+* Output         : None
+* Return         : None
+*******************************************************************************
+*******************************************************************************/
+float angleLimit(float angle, float max,float min);
+
+/*******************************************************************************
+* Function Name  : MotionTypeHandler_x
+* Description    : servo物件的各種動作處理器
+* Input          : @SERVO *servo
+* Output         : None
+* Return         : None
+*******************************************************************************
+*******************************************************************************/
+void MotionTypeHandler_1(SERVO *servo);
+void MotionTypeHandler_2(SERVO *servo);
+void MotionTypeHandler_3(SERVO *servo);
+void MotionTypeHandler_4(SERVO *servo);
+void MotionTypeHandler_5(SERVO *servo);
+void MotionTypeHandler_6(SERVO *servo);
+
+
+
+/* Functions -----------------------------------------------------------------*/
 float angleLimit(float angle, float max,float min){
   if (angle > max){
     angle = max; 
