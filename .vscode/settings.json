@@ -1,0 +1,23 @@
+{
+  "terminal.integrated.env.osx": {
+    "PATH": "/Users/jo/.platformio/penv/bin:/Users/jo/.platformio/penv:/Users/jo/Downloads/google-cloud-sdk/bin:/anaconda3/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:/Applications/Wireshark.app/Contents/MacOS",
+    "PLATFORMIO_CALLER": "vscode"
+  },
+  "files.associations": {
+    "stm32f1xx_hal.h": "c",
+    "stm32f1xx_hal_conf.h": "c",
+    "adc.h": "c",
+    "main.h": "c",
+    "gpio.h": "c",
+    "tim.h": "c",
+    "mymain.h": "c",
+    "myservo.h": "c",
+    "stdint.h": "c",
+    "types.h": "c",
+    "stdbool.h": "c",
+    "stm32f1xx_it.h": "c",
+    "ur.h": "c",
+    "usart.h": "c",
+    "string.h": "c"
+  }
+}
