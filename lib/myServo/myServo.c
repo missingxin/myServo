@@ -41,9 +41,6 @@ float angleLimit(float angle, float max,float min);
 void MotionTypeHandler_1(SERVO *servo);
 void MotionTypeHandler_2(SERVO *servo);
 void MotionTypeHandler_3(SERVO *servo);
-void MotionTypeHandler_4(SERVO *servo);
-void MotionTypeHandler_5(SERVO *servo);
-void MotionTypeHandler_6(SERVO *servo);
 
 
 
@@ -146,92 +143,6 @@ void MotionTypeHandler_3(SERVO *servo){
   }
 }
 
-//-- type 4 (extended)
-//command, called from main lane
-void ExDoVelocityInMs(SERVO *servo, float velocity, long ms, 
-long (*exVelocityFunc)(float angle, float velocity, long ms, long ttlms)){
-  (*servo).pendingJob.workmode = 4;
-  (*servo).pendingJob.velocity = velocity;
-  (*servo).pendingJob.exVelocityFunc = exVelocityFunc;
-  (*servo).pendingJob.countdownInMs = ms;
-  (*servo).pendingJob.totalTimeInMs = ms;
-  (*servo).hasPendingJob = 1;
-}
-// cb, called from interrupt lane
-void MotionTypeHandler_4(SERVO *servo){
-  if (servo->currentJob.countdownInMs == 0 ){
-    (*servo).currentJobDne = 1;
-  }else{
-    long angle = servo->currentJob.exVelocityFunc(servo->angle, servo->currentJob.velocity, servo->currentJob.countdownInMs, servo->currentJob.totalTimeInMs);
-    (*servo).angle = angleLimit(angle, servo->angleMax, servo->angleMin);
-    if (servo->currentJob.countdownInMs <= servo->timerPeriod){
-      (*servo).currentJob.countdownInMs = 0;
-    }else{
-      (*servo).currentJob.countdownInMs = servo->currentJob.countdownInMs - servo->timerPeriod;
-    }
-  }
-}
-
-//-- type 5 (extended)
-//command, called from main lane
-void ExDoAccelerateInMs(SERVO *servo,float velocity, float accelerate, long ms, 
-long (*exAccelerateFunc)(float angle, float velocity, float accelerate, long ms, long ttlms)){
-  (*servo).pendingJob.workmode = 5;
-  (*servo).pendingJob.velocity = velocity;
-  (*servo).pendingJob.accelerate = accelerate;
-  (*servo).pendingJob.exAccelerateFunc = exAccelerateFunc;
-  (*servo).pendingJob.countdownInMs = ms;
-  (*servo).pendingJob.totalTimeInMs = ms;
-  (*servo).hasPendingJob = 1;
-}
-// cb, called from interrupt lane
-void MotionTypeHandler_5(SERVO *servo){
-  if (servo->currentJob.countdownInMs == 0 ){
-    (*servo).currentJobDne = 1;
-  }else{
-    long angle = servo->currentJob.exAccelerateFunc(
-                  servo->angle, servo->currentJob.velocity, servo->currentJob.accelerate, 
-                  servo->currentJob.countdownInMs, servo->currentJob.totalTimeInMs);
-    (*servo).angle = angleLimit(angle, servo->angleMax, servo->angleMin);
-    if (servo->currentJob.countdownInMs <= servo->timerPeriod){
-      (*servo).currentJob.countdownInMs = 0;
-    }else{
-      (*servo).currentJob.countdownInMs = servo->currentJob.countdownInMs - servo->timerPeriod;
-    }
-  }
-}
-
-//-- type 6 (extended)
-//command, called from main lane
-void ExDoJerkInMs(SERVO *servo,float velocity, float accelerate, float jerk, long ms,
-long (*exJerkFunc)(float angle, float velocity, float accelerate, float jerk, long ms, long ttlms)){
-  (*servo).pendingJob.workmode = 6;
-  (*servo).pendingJob.velocity = velocity;
-  (*servo).pendingJob.accelerate = accelerate;
-  (*servo).pendingJob.jerk = jerk;
-  (*servo).pendingJob.exJerkFunc = exJerkFunc;
-  (*servo).pendingJob.countdownInMs = ms;
-  (*servo).pendingJob.totalTimeInMs = ms;
-  (*servo).hasPendingJob = 1;
-}
-// cb, called from interrupt lane
-void MotionTypeHandler_6(SERVO *servo){
-  if (servo->currentJob.countdownInMs == 0 ){
-    (*servo).currentJobDne = 1;
-  }else{
-    long angle = servo->currentJob.exJerkFunc(servo->angle, servo->currentJob.velocity, servo->currentJob.accelerate, servo->currentJob.jerk, servo->currentJob.countdownInMs, servo->currentJob.totalTimeInMs);
-    (*servo).angle = angleLimit(angle, servo->angleMax, servo->angleMin);
-    if (servo->currentJob.countdownInMs <= servo->timerPeriod){
-      (*servo).currentJob.countdownInMs = 0;
-    }else{
-      (*servo).currentJob.countdownInMs = servo->currentJob.countdownInMs - servo->timerPeriod;
-    }
-  }
-}
-
-
-
-
 
 //-- type switcher
 void ServoTimerCallback(SERVO *servo){
@@ -240,7 +151,7 @@ void ServoTimerCallback(SERVO *servo){
   if(servo->hasPendingJob){
     servo->hasPendingJob    = 0;
     servo->currentJobDne    = 0;
-    memcpy((void *)&(servo->currentJob),(void *)&(servo->currentJob),sizeof(JOB));
+    memcpy((void *)&(servo->currentJob),(void *)&(servo->pendingJob),sizeof(JOB));
   }
   if(servo->power == 0){
     (*servo).currentJob.workmode = 0;
@@ -258,15 +169,6 @@ void ServoTimerCallback(SERVO *servo){
       break;
     case(3):
       MotionTypeHandler_3(servo);
-      break;
-    case(4):
-      MotionTypeHandler_4(servo);
-      break;
-    case(5):
-      MotionTypeHandler_5(servo);
-      break;
-    case(6):
-      MotionTypeHandler_6(servo);
       break;
     default:{
       (*servo).currentJob.workmode = 0;

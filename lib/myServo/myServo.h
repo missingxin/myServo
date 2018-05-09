@@ -110,7 +110,7 @@ void DoVelocityInMs(SERVO *servo, float velocity, long ms);
 //自帶系數變化規則
 /*******************************************************************************
 * Function Name  : ExGotoAngleInMs
-* Description    : 在特定時間ms以內，調整自身至指定位置
+* Description    : 在特定時間ms以內，按照特別指定的規則調整自身至指定位置（像是log什麼的）
 * Input          : @SERVO *servo
 *                  @long ms
 *                  @long (*exAngleFunc)(float angle, long ms, long ttlms)
@@ -121,53 +121,6 @@ void DoVelocityInMs(SERVO *servo, float velocity, long ms);
 void ExGotoAngleInMs(SERVO *servo, long ms, 
 long (*exAngleFunc)(float angle, long ms, long ttlms));
 
-
-/*******************************************************************************
-* Function Name  : ExGotoAngleInMs
-* Description    : 在特定時間ms以內，用 exVelocityFunc 決定下一刻的 velocity，之後用一般計算
-* Input          : @SERVO *servo
-*                  @float velocity
-*                  @long ms
-*                  @long (*exVelocityFunc)(float angle, float velocity, long ms, long ttlms)
-* Output         : None
-* Return         : None
-*******************************************************************************
-*******************************************************************************/
-void ExDoVelocityInMs(SERVO *servo, float velocity, long ms, 
-long (*exVelocityFunc)(float angle, float velocity, long ms, long ttlms));
-
-
-/*******************************************************************************
-* Function Name  : ExGotoAngleInMs
-* Description    : 在特定時間ms以內，用velocity,accelerate 決定接下來的位置，超過最大角度時會用最停在最大角度並暫停  velocity ＝ angle/s，accelerate = angle/s^2
-* Input          : @SERVO *servo,
-*                  @float velocity, 
-*                  @float accelerate, 
-*                  @long ms, 
-*                  @long (*exAccelerateFunc)(float angle, float velocity, float accelerate, long ms, long ttlms)
-* Output         : None
-* Return         : None
-*******************************************************************************
-*******************************************************************************/
-void ExDoAccelerateInMs(SERVO *servo,float velocity, float accelerate, long ms, 
-long (*exAccelerateFunc)(float angle, float velocity, float accelerate, long ms, long ttlms));
-
-
-/*******************************************************************************
-* Function Name  : ExDoJerkInMs
-* Description    : 在特定時間ms以內，用velocity,accelerate,jerk 決定接下來的位置，超過最大角度時會用最停在最大角度並暫停  velocity ＝ angle/s，accelerate = angle/s^3
-* Input          : @SERVO *servo,
-*                  @float velocity, 
-*                  @float accelerate, 
-*                  @float jerk, 
-*                  @long ms, 
-*                  @long (*exJerkFunc)(float angle, float velocity, float accelerate, float jerk, long ms, long ttlms)
-* Output         : None
-* Return         : None
-*******************************************************************************
-*******************************************************************************/
-void ExDoJerkInMs(SERVO *servo,float velocity, float accelerate, float jerk, long ms,
-long (*exJerkFunc)(float angle, float velocity, float accelerate, float jerk, long ms, long ttlms));
 
 /*******************************************************************************
 * Function Name  : ExGotoAngleInMs
