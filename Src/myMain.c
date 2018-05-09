@@ -45,12 +45,12 @@ void servoDoAngle5(float angle){ htim4.Instance->CCR2 = (uint16_t)(angle * argA 
 
 /* Private variables ---------------------------------------------------------*/
 // 2. #########  初始化 servo object, 包括相關狀態，設定以及功能  #########
-SERVO servo0 = { 0, 0, 0, {}, 1, {}, 90.0f, -90.0f, 0, 20, servoDoAngle0 };
-SERVO servo1 = { 0, 0, 0, {}, 1, {}, 90.0f, -90.0f, 0, 20, servoDoAngle1 };
-SERVO servo2 = { 0, 0, 0, {}, 1, {}, 90.0f, -90.0f, 0, 20, servoDoAngle2 };
-SERVO servo3 = { 0, 0, 0, {}, 1, {}, 90.0f, -90.0f, 0, 20, servoDoAngle3 };
-SERVO servo4 = { 0, 0, 0, {}, 1, {}, 90.0f, -90.0f, 0, 20, servoDoAngle4 };
-SERVO servo5 = { 0, 0, 0, {}, 1, {}, 90.0f, -90.0f, 0, 20, servoDoAngle5 };
+SERVO servo0 = { 1, 0, 0, {}, 1, {}, 90.0f, -90.0f, 0, 20, servoDoAngle0 };
+SERVO servo1 = { 1, 0, 0, {}, 1, {}, 90.0f, -90.0f, 0, 20, servoDoAngle1 };
+SERVO servo2 = { 1, 0, 0, {}, 1, {}, 90.0f, -90.0f, 0, 20, servoDoAngle2 };
+SERVO servo3 = { 1, 0, 0, {}, 1, {}, 90.0f, -90.0f, 0, 20, servoDoAngle3 };
+SERVO servo4 = { 1, 0, 0, {}, 1, {}, 90.0f, -90.0f, 0, 20, servoDoAngle4 };
+SERVO servo5 = { 1, 0, 0, {}, 1, {}, 90.0f, -90.0f, 0, 20, servoDoAngle5 };
 
 
 /* Private functions ---------------------------------------------------------*/

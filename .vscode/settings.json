@@ -18,6 +18,7 @@
     "stm32f1xx_it.h": "c",
     "ur.h": "c",
     "usart.h": "c",
-    "string.h": "c"
+    "string.h": "c",
+    "plcopen.h": "c"
   }
 }

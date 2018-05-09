@@ -46,10 +46,10 @@ typedef enum{
 }WORD;
 
 typedef struct{
-  FA_STAT stat    = FA_Disabled;
-  BOOL    power   = FALSE;
-  BOOL    positive = FALSE;
-  BOOL    negative = FALSE;
+  FA_STAT stat;     // FA_Disabled;
+  BOOL    power;    // FALSE;
+  BOOL    positive; // FALSE;
+  BOOL    negative; // FALSE;
 }AXIS_REF;
 
 /* Private define ------------------------------------------------------------*/
@@ -85,6 +85,7 @@ typedef struct{
 *  ‘EnablePositive’ & ‘EnableNegative’ can both be true.
 *  Only 1 FB MC_Power should be issued per axis.
 *******************************************************************************/
+/*
 void MC_Power(
   //VAR_IN_OUT
     AXIS_REF Asix,
@@ -98,7 +99,7 @@ void MC_Power(
     BOOL EnablePositive,   //E As long as ‘Enable’ is true, this permits motion in positive direction
     BOOL EnableNegative    //E As long as ‘Enable’ is true, this permits motion in negative direction
 );
-
+*/
 
 
 
@@ -106,12 +107,12 @@ void MC_Power(
 void MC_Power_updater(MC_Power_St *obj);
 typedef struct MC_Power_St{
   AXIS_REF *Asix;        //I/O B asix
-  BOOL *Enable,          //IN  B As long as ‘Enable’ is true, power is being enabled.
-  BOOL *EnablePositive,  //IN  E As long as ‘Enable’ is true, this permits motion in positive direction
-  BOOL *EnableNegative   //IN  E As long as ‘Enable’ is true, this permits motion in negative direction
-  bool Status;           //OUT B Effective state of the power stage
-  bool Valid;            //OUT E If true, a valid set of outputs is available at the FB
-  bool Error;            //OUT B Signals that an error has occurred within the Function Block
+  BOOL *Enable;          //IN  B As long as ‘Enable’ is true, power is being enabled.
+  BOOL *EnablePositive;  //IN  E As long as ‘Enable’ is true, this permits motion in positive direction
+  BOOL *EnableNegative;   //IN  E As long as ‘Enable’ is true, this permits motion in negative direction
+  BOOL Status;           //OUT B Effective state of the power stage
+  BOOL Valid;            //OUT E If true, a valid set of outputs is available at the FB
+  BOOL Error;            //OUT B Signals that an error has occurred within the Function Block
   WORD ErrorID;          //OUT E Error identification
   void (*updater)(MC_Power_St* obj)
 }MC_Power_St;

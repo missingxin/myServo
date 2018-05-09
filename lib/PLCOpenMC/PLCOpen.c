@@ -17,64 +17,65 @@
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
 
-
 // ############################### function 形式 ###############################
+/*
 void MC_Power(  //I/O
               AXIS_REF Asix, 
                 //O
-              bool *Status, bool *Valid, bool *Error, WORD ErrorID, 
+              BOOL *Status, BOOL *Valid, BOOL *Error, WORD ErrorID, 
                 //I
-              bool Enable,bool EnablePositive,bool EnableNegative)
+              BOOL Enable,BOOL EnablePositive,BOOL EnableNegative)
 {
   //初始化輸出
-  *Status = false;
-  *Valid  = false;
-  *Error  = false;
+  *Status = FALSE;
+  *Valid  = FALSE;
+  *Error  = FALSE;
   ErrorID = WORD_NO_ERROR;
   //讀取輸入
   Asix.positive = EnablePositive;
   Asix.negative = EnableNegative;
   //按FA及輸入決定處理方式
-  if(Enable == true){
+  if(Enable == TRUE){
     switch(Asix.stat){
-      case(FA_Disabled):{
+      case(FA_DISABLED):{
         *Status = AXIS_POWER(Enable);
-        if(*Status == true){
-          Asix.power=true;
-          Asix.stat = FA_Standstill;
+        if(*Status == TRUE){
+          Asix.power=TRUE;
+          Asix.stat = FA_STANDSTILL;
         }else{
-          Asix.power=false;
-          Asix.stat = FA_Errorstop;
+          Asix.power=FALSE;
+          Asix.stat = FA_ERRORSTOP;
         }
         *Valid = *Status;
         break;
       }
-      case(FA_Errorstop):{
-        Asix.power=false;
+      case(FA_ERRORSTOP):{
+        Asix.power=FALSE;
         break;
       }
       default:{
-        Asix.power=true;
-        *Valid = true;
+        Asix.power=TRUE;
+        *Valid = TRUE;
         break;
       }
     }
   }else{
     AXIS_POWER(Enable);
-    Asix.power=false;
-    *Valid = true;
+    Asix.power=FALSE;
+    *Valid = TRUE;
   }
 }
-
+*/
 
 
 // ############################### Object Way ###############################
 
-//建立物件
+//物件更新器
 void MC_Power_updater(MC_Power_St *obj){
   
+  
 }
-MC_Power_St test1 = {NULL,NULL,NULL,0,0,0,0,MC_Power_updater};
+MC_Power_St test1 = {0,0,0,0,0,0,0,WORD_NO_ERROR,MC_Power_updater};
 
 
 
@@ -143,9 +144,9 @@ void MC_Power(
                 //I/O
               AXIS_REF Asix, 
                 //O
-              bool *Status, bool *Valid, bool *Error, WORD ErrorID, 
+              BOOL *Status, BOOL *Valid, BOOL *Error, WORD ErrorID, 
                 //I
-              bool Enable,bool EnablePositive,bool EnableNegative)
+              BOOL Enable,BOOL EnablePositive,BOOL EnableNegative)
 {
   power=Enable;
   //printf("----------------: %d\n\r",power);
@@ -736,7 +737,7 @@ void MC_SetPosition(int Execute ,float Position, int Relative,int ExecutionMode)
   //??ExecutionMode
   position=Position;
 }
-void MC_SetOverride(bool Enable,float VelFactor, float AccFactor,int JerkFactor)
+void MC_SetOverride(BOOL Enable,float VelFactor, float AccFactor,int JerkFactor)
 {
   //未定義
   //??Enable
@@ -745,16 +746,16 @@ void MC_SetOverride(bool Enable,float VelFactor, float AccFactor,int JerkFactor)
   //??JerkFactor
   axis.Enabled=1;
 }
-void MC_ReadParameter(bool Enable,int ParameterNumber)
+void MC_ReadParameter(BOOL Enable,int ParameterNumber)
 {
   //讀MC_Parameter值
   ReadParameterNumberTable(ParameterNumber);
   axis.Value=1;
 }
-void MC_ReadboolParameter(bool Enable,int ParameterNumber)
+void MC_ReadBOOLParameter(BOOL Enable,int ParameterNumber)
 {
   //讀MC_Parameter值
-  ReadboolParameterNumberTable(ParameterNumber);
+  ReadBOOLParameterNumberTable(ParameterNumber);
   axis.Value=1;
 }
 void MC_WriteParameter(int Execute ,int ParameterNumber,float Value,int ExecutionMode)
@@ -763,27 +764,27 @@ void MC_WriteParameter(int Execute ,int ParameterNumber,float Value,int Executio
   //??ExecutionMode
   WriteRealParameterTable(ParameterNumber,Value);
 }
-void MC_WriteboolParameter(int Execute ,int ParameterNumber,int Value,int ExecutionMode)
+void MC_WriteBOOLParameter(int Execute ,int ParameterNumber,int Value,int ExecutionMode)
 {
   //寫MC_Parameter值
   //??ExecutionMode
-  WriteboolParameterTable(ParameterNumber,Value);
+  WriteBOOLParameterTable(ParameterNumber,Value);
 }
-void MC_ReadDigitalInput(bool Enable,int InputNumber)
+void MC_ReadDigitalInput(BOOL Enable,int InputNumber)
 {
   //讀取一個外訊號
   //Enable
   //InputNumber
   axis.Value=0;
 }
-void MC_ReadDigitalOutput(bool Enable,int OutputNumber)
+void MC_ReadDigitalOutput(BOOL Enable,int OutputNumber)
 {
   //未定義
   //Enable
   //OutputNumber
   axis.Value=0;
 }
-void MC_WriteDigitalOutput(bool Enable,int OutputNumber,int Value,int ExecutionMode)
+void MC_WriteDigitalOutput(BOOL Enable,int OutputNumber,int Value,int ExecutionMode)
 {
   //輸出訊息給外部的機械
   //Enable
@@ -834,7 +835,7 @@ void MC_ReadStatus(int Enable)
     printf("Status: SynchronizedMotion\n\r");
   }
 }
-void MC_ReadMotionState(bool Enable,int Source)
+void MC_ReadMotionState(BOOL Enable,int Source)
 {
   if(axis.ConstantVelocity==1)
   {
@@ -908,7 +909,7 @@ void MC_Reset(int Enable)
   axis.Standstill=1;
   axiserror=0;
 }
-void MC_DigitalCamSwitch(bool Enable,float EnableMask,int ValueSource)
+void MC_DigitalCamSwitch(BOOL Enable,float EnableMask,int ValueSource)
 {
   //未定義
   //??EnableMask
@@ -1159,7 +1160,7 @@ void ReadParameterNumberTable(int number)
     printf("%f\n\r",jerk);
   }
 }
-void ReadboolParameterNumberTable(int number)
+void ReadBOOLParameterNumberTable(int number)
 {
   if(number==4)
   {
@@ -1208,19 +1209,19 @@ void WriteRealParameterTable(int number,float realvalue)
     mc_parameter.MaxJerkAppl=realvalue;
   }
 }
-void WriteboolParameterTable(int number,int boolvalue)
+void WriteBOOLParameterTable(int number,int BOOLvalue)
 {
   if(number==4)
   {
-    mc_parameter.EnableLimitPos=boolvalue;
+    mc_parameter.EnableLimitPos=BOOLvalue;
   }
   else if(number==5)
   {
-    mc_parameter.EnableLimitNeg=boolvalue;
+    mc_parameter.EnableLimitNeg=BOOLvalue;
   }
   else if(number==6)
   {
-    mc_parameter.EnablePosLagMonitoring=boolvalue;
+    mc_parameter.EnablePosLagMonitoring=BOOLvalue;
   }
 }
 
