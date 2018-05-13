@@ -22,6 +22,7 @@
 #include "myServo.h"
 #include "ur.h"
 
+#include "PLCOpen.h"
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 #define PWM_Period 60000

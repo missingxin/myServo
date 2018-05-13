@@ -9,6 +9,40 @@
 *******************************************************************************/
 /* Includes ------------------------------------------------------------------*/
 #include "PLCOpen.h"
+#include "MC_Power.h"
+#include "MC_Home.h"
+#include "MC_Stop.h"
+#include "MC_Halt.h"
+#include "MC_MoveAbsolute.h"
+// ############################### Object Way ###############################
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*  後面某些情況會用到
+  switch(obj->Axis->stat){
+    case(FA_DISABLED):          { break; }
+    case(FA_STANDSTILL):        { break; }
+    case(FA_HOMING):            { break; }
+    case(FA_STOPPING):          { break; }
+    case(FA_DISCRETEMOTION):    { break; }
+    case(FA_CONTINUOUSMOTION):  { break; }
+    case(FA_SYNCHRONIZEDMOTION):{ break; }
+    case(FA_ERRORSTOP):         { break; }
+    default:                    { break; }
+  }
+  */
+
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -20,7 +54,7 @@
 // ############################### function 形式 ###############################
 /*
 void MC_Power(  //I/O
-              AXIS_REF Asix, 
+              AXIS_REF Axis, 
                 //O
               BOOL *Status, BOOL *Valid, BOOL *Error, WORD ErrorID, 
                 //I
@@ -32,50 +66,41 @@ void MC_Power(  //I/O
   *Error  = FALSE;
   ErrorID = WORD_NO_ERROR;
   //讀取輸入
-  Asix.positive = EnablePositive;
-  Asix.negative = EnableNegative;
+  Axis.positive = EnablePositive;
+  Axis.negative = EnableNegative;
   //按FA及輸入決定處理方式
   if(Enable == TRUE){
-    switch(Asix.stat){
+    switch(Axis.stat){
       case(FA_DISABLED):{
         *Status = AXIS_POWER(Enable);
         if(*Status == TRUE){
-          Asix.power=TRUE;
-          Asix.stat = FA_STANDSTILL;
+          Axis.power=TRUE;
+          Axis.stat = FA_STANDSTILL;
         }else{
-          Asix.power=FALSE;
-          Asix.stat = FA_ERRORSTOP;
+          Axis.power=FALSE;
+          Axis.stat = FA_ERRORSTOP;
         }
         *Valid = *Status;
         break;
       }
       case(FA_ERRORSTOP):{
-        Asix.power=FALSE;
+        Axis.power=FALSE;
         break;
       }
       default:{
-        Asix.power=TRUE;
+        Axis.power=TRUE;
         *Valid = TRUE;
         break;
       }
     }
   }else{
     AXIS_POWER(Enable);
-    Asix.power=FALSE;
+    Axis.power=FALSE;
     *Valid = TRUE;
   }
 }
 */
 
-
-// ############################### Object Way ###############################
-
-//物件更新器
-void MC_Power_updater(MC_Power_St *obj){
-  
-  
-}
-MC_Power_St test1 = {0,0,0,0,0,0,0,WORD_NO_ERROR,MC_Power_updater};
 
 
 
@@ -142,7 +167,7 @@ int axiserror=0;
 
 void MC_Power(
                 //I/O
-              AXIS_REF Asix, 
+              AXIS_REF Axis, 
                 //O
               BOOL *Status, BOOL *Valid, BOOL *Error, WORD ErrorID, 
                 //I
@@ -1078,7 +1103,7 @@ void returnPeriod()
     //TIM_TimeBaseStructure.TIM_Period = 4;
   }
   //TIM_TimeBaseStructure.TIM_Period 本來就會影響TIM2,TIM3
-  //TIM_TimeBaseInit(TIM2, &TIM_TimeBaseStructure);    //***只重新設定Timer2的週期,就不會影響TIM3
+  //TIM_TimeBaseInit(TIM2, &TIM_TimeBaseStructure);    // ***只重新設定Timer2的週期,就不會影響TIM3
 }
 
 

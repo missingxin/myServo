@@ -1,3 +1,5 @@
+#ifndef __PLCOPEN_MC_H__
+#define __PLCOPEN_MC_H__
 /*******************************************************************************
 * File Name          : PLCOpen.h
 * Author             : Joseph Lin
@@ -22,10 +24,26 @@
 #endif
 
 #if !defined(REAL)
-#define REAL REAL
+#define REAL float
 #endif
 
 typedef enum{
+  undefine, //0
+  test
+}MC_BUFFER_MODE; //See 2.4.2 Aborting versus Buffered modes
+
+typedef enum{
+  WORD_NO_ERROR, //0
+  WORD_UNDEFINED
+}WORD;
+
+typedef enum{
+  mcPositiveDirection,
+  mcShortestWay,
+  mcNegativeDirection,
+  mcCurrentDirection
+}MC_DIRECTION;
+typedef enum {
   FA_DISABLED,  //0
   FA_STANDSTILL,
   FA_HOMING,
@@ -33,24 +51,49 @@ typedef enum{
   FA_DISCRETEMOTION,
   FA_CONTINUOUSMOTION,
   FA_SYNCHRONIZEDMOTION,
-  FA_ERRORSTOP,
+  FA_ERRORSTOP
+}FA_STAT_NUM;
+
+
+typedef union{
+  BOOL FA[8];
+  struct {
+    BOOL FA_DISABLED;
+    BOOL FA_STANDSTILL;
+    BOOL FA_HOMING;
+    BOOL FA_STOPPING;
+    BOOL FA_DISCRETEMOTION;
+    BOOL FA_CONTINUOUSMOTION;
+    BOOL FA_SYNCHRONIZEDMOTION;
+    BOOL FA_ERRORSTOP;
+  };
 }FA_STAT;
 
-typedef enum{
-  undefine, //0
-  test
-}MC_BufferMode; //See 2.4.2 Aborting versus Buffered modes
 
-typedef enum{
-  WORD_NO_ERROR //0
-}WORD;
+typedef struct AXIS_REF AXIS_REF;
+void setStat(AXIS_REF *axis, FA_STAT_NUM stat);
 
-typedef struct{
+struct AXIS_REF{
   FA_STAT stat;     // FA_Disabled;
   BOOL    power;    // FALSE;
   BOOL    positive; // FALSE;
   BOOL    negative; // FALSE;
-}AXIS_REF;
+  void *  DEVICE;
+  void *  CurrentFB;
+  void (*setStat)(AXIS_REF *axis, FA_STAT_NUM stat);
+};
+
+
+//立起指定stat, 倒下其他所有stat
+void setStat(AXIS_REF *axis, FA_STAT_NUM stat){
+  unsigned char i;
+  for(i=0;i<8;i++){ (*axis).stat.FA[i] = 0; }
+  (*axis).stat.FA[stat] = 1;
+}
+
+// ############################### Object Way ###############################
+
+
 
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
@@ -66,7 +109,7 @@ typedef struct{
 /**3.1**************************************************************************
 * Function Name  : MC_Power
 * Description    : This Function Block controls the power stage (On or Off).
-* In and Out     : @AXIS_REF Asix         //B Asix
+* In and Out     : @AXIS_REF Axis         //B Axis
 * Input          : @BOOL Enable,          //B As long as ‘Enable’ is true, power is being enabled.
 *                  @BOOL EnablePositive,  //E As long as ‘Enable’ is true, this permits motion in positive direction
 *                  @BOOL EnableNegative   //E As long as ‘Enable’ is true, this permits motion in negative direction
@@ -88,7 +131,7 @@ typedef struct{
 /*
 void MC_Power(
   //VAR_IN_OUT
-    AXIS_REF Asix,
+    AXIS_REF Axis,
   //VAR_OUTPUT
     BOOL *Status,          //B Effective state of the power stage
     BOOL *Valid,           //E If true, a valid set of outputs is available at the FB
@@ -102,20 +145,6 @@ void MC_Power(
 */
 
 
-
-// ############################### Object Way ###############################
-void MC_Power_updater(MC_Power_St *obj);
-typedef struct MC_Power_St{
-  AXIS_REF *Asix;        //I/O B asix
-  BOOL *Enable;          //IN  B As long as ‘Enable’ is true, power is being enabled.
-  BOOL *EnablePositive;  //IN  E As long as ‘Enable’ is true, this permits motion in positive direction
-  BOOL *EnableNegative;   //IN  E As long as ‘Enable’ is true, this permits motion in negative direction
-  BOOL Status;           //OUT B Effective state of the power stage
-  BOOL Valid;            //OUT E If true, a valid set of outputs is available at the FB
-  BOOL Error;            //OUT B Signals that an error has occurred within the Function Block
-  WORD ErrorID;          //OUT E Error identification
-  void (*updater)(MC_Power_St* obj)
-}MC_Power_St;
 
 
 
@@ -227,7 +256,7 @@ struct multiAxisinfo
 //  MC_Home is a generic FB which does a system specified homing procedure which can be constructed by the StepHoming FBs as specified in Part 5 – Homing Procedures.
 void MC_Home(   
   //VAR_IN_OUT
-    AXIS_REF Asix,
+    AXIS_REF Axis,
   //VAR_OUTPUT
     BOOL Done,            //B Reference known and set sucessfully
     BOOL Busy,            //E The FB is not finished and new output values are to be expected
@@ -931,3 +960,7 @@ void setMultiAxisinfo(void);
 
 
 */
+
+
+
+#endif //__PLCOPEN_MC_H__
