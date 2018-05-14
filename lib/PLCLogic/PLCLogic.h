@@ -8,8 +8,8 @@
 * 說明：主要目標是建立一個可重覆使用在不同平台的 PLCLogic Function Block Diagram (FBD) 
 *******************************************************************************/
 /* Includes ------------------------------------------------------------------*/
-#ifndef __PLCFBD_H__
-#define __PLCFBD_H__
+#ifndef __PLCLOGIC_H__
+#define __PLCLOGIC_H__
 /* Private typedef -----------------------------------------------------------*/
 #if !defined(BOOL)
 #define BOOL unsigned char
@@ -28,13 +28,16 @@
 #endif
 
 //輸入FB, 接受外部值, 更新時bypass, BOOL
-typedef struct FBD_BOOL_SOURCE_T FBD_BOOL_SOURCE_T;
-struct FBD_BOOL_SOURCE_T{
+#if !defined(INPUT_SOURCE_BOOL_T)
+#define INPUT_SOURCE_BOOL_T INPUT_SOURCE_BOOL_T
+typedef struct INPUT_SOURCE_BOOL_T INPUT_SOURCE_BOOL_T;
+struct INPUT_SOURCE_BOOL_T{
   BOOL IN;
   BOOL OUT;
-  void (*updater)(FBD_BOOL_SOURCE_T* obj);
-  void (*assign)(FBD_BOOL_SOURCE_T* obj, BOOL val);
+  void (*updater)(INPUT_SOURCE_BOOL_T* obj);
+  void (*assign)(INPUT_SOURCE_BOOL_T* obj, BOOL val);
 };
+#endif
 
 //1進1出的FB結構
 typedef struct FBD_IO_T FBD_IO_T;
@@ -54,8 +57,8 @@ struct FBD_IIO_T{
 };
 
 
-void LOGIC_SOURCE_updater(FBD_BOOL_SOURCE_T* obj);
-void LOGIC_SOURCE_assign(FBD_BOOL_SOURCE_T* obj, BOOL val);
+void INPUT_SOURCE_BOOL_assign(INPUT_SOURCE_BOOL_T* obj, BOOL val);
+void INPUT_SOURCE_BOOL_updater(INPUT_SOURCE_BOOL_T* obj);
 void LOGIC_NOT_updater(FBD_IO_T *obj);
 void LOGIC_AND_updater(FBD_IIO_T *obj);
 void LOGIC_OR_updater(FBD_IIO_T *obj);
@@ -63,4 +66,4 @@ void LOGIC_NAND_updater(FBD_IIO_T *obj);
 void LOGIC_NOR_updater(FBD_IIO_T *obj);
 void LOGIC_XOR_updater(FBD_IIO_T *obj);
 
-#endif //__PLCFBD_H__
+#endif //__PLCLOGIC_H__

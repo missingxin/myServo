@@ -2,7 +2,7 @@
 * File Name          : PLCOpen.h
 * Author             : Joseph Lin
 * Version            : V0.0.1
-* Date               : 05/8/2018
+* Date               : 05/15/2018
 * Description        : 建立可物件化的PLCOpen Middleware
 ********************************************************************************
 * 說明：主要目標是建立一個可重覆使用在不同平台的 PLCOpen Middleware
@@ -10,7 +10,6 @@
 /* Includes ------------------------------------------------------------------*/
 #ifndef __PLCOPEN_MC_H__
 #define __PLCOPEN_MC_H__
-#include "PLCLogic.h"
 /* Private typedef -----------------------------------------------------------*/
 #if !defined(BOOL)
 #define BOOL unsigned char
@@ -29,13 +28,13 @@
 #endif
 
 
-//輸入FB, 接受外部值, 更新時bypass, REAL
-typedef struct FBD_REAL_SOURCE_T FBD_REAL_SOURCE_T;
-struct FBD_REAL_SOURCE_T{
+//輸入FB, 接受外部值, 更新時bypass, REAL, 因目前只會在這裡使用，所以做在這裡
+typedef struct INPUT_SOURCE_REAL_T INPUT_SOURCE_REAL_T;
+struct INPUT_SOURCE_REAL_T{
   REAL IN;
   REAL OUT;
-  void (*updater)(FBD_REAL_SOURCE_T* obj);
-  void (*assign)(FBD_REAL_SOURCE_T* obj, REAL val);
+  void (*updater)(INPUT_SOURCE_REAL_T* obj);
+  void (*assign)(INPUT_SOURCE_REAL_T* obj, REAL val);
 };
 
 typedef enum{
@@ -82,8 +81,6 @@ typedef union{
 
 
 typedef struct AXIS_REF AXIS_REF;
-void setStat(AXIS_REF *axis, FA_STAT_NUM stat);
-
 struct AXIS_REF{
   FA_STAT stat;     // FA_Disabled;
   BOOL    power;    // FALSE;
@@ -93,6 +90,11 @@ struct AXIS_REF{
   void *  CurrentFB;
   void (*setStat)(AXIS_REF *axis, FA_STAT_NUM stat);
 };
+
+void INPUT_SOURCE_REAL_assign(INPUT_SOURCE_REAL_T* obj, REAL val);
+void INPUT_SOURCE_REAL_updater(INPUT_SOURCE_REAL_T* obj);
+void setStat(AXIS_REF *axis, FA_STAT_NUM stat);
+
 
 
 

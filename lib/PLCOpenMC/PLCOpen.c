@@ -16,14 +16,23 @@
 #include "MC_MoveAbsolute.h"
 // ############################### Object Way ###############################
 
-//立起指定stat, 倒下其他所有stat
+
+//######### 指令傳入參數 ####################
+void INPUT_SOURCE_REAL_assign(INPUT_SOURCE_REAL_T* obj, REAL val){
+  (*obj).IN = val;
+}
+
+//######### 輸入輸出及狀態管理器 ####################
+void INPUT_SOURCE_REAL_updater(INPUT_SOURCE_REAL_T* obj){
+  (*obj).OUT = obj->IN;
+}
+
+////######### 立起指定stat, 倒下其他所有stat //#########
 void setStat(AXIS_REF *axis, FA_STAT_NUM stat){
   unsigned char i;
   for(i=0;i<8;i++){ (*axis).stat.FA[i] = 0; }
   (*axis).stat.FA[stat] = 1;
 }
-
-
 
 
 

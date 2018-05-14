@@ -12,12 +12,13 @@
 // ############################### Object Way ###############################
 
 
-void LOGIC_SOURCE_assign(FBD_BOOL_SOURCE_T* obj, BOOL val){
+//######### 指令傳入參數 ####################
+void INPUT_SOURCE_BOOL_assign(INPUT_SOURCE_BOOL_T* obj, BOOL val){
   (*obj).IN = val;
 }
 
 //######### 輸入輸出及狀態管理器 ####################
-void LOGIC_SOURCE_updater(FBD_BOOL_SOURCE_T* obj){
+void INPUT_SOURCE_BOOL_updater(INPUT_SOURCE_BOOL_T* obj){
   (*obj).OUT = obj->IN;
 }
 
