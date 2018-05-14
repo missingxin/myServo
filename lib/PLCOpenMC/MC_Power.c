@@ -1,11 +1,11 @@
 /*******************************************************************************
-* File Name          : PLCOpen.c
+* File Name          : MC_Power.c
 * Author             : Joseph Lin
 * Version            : V0.0.1
-* Date               : 05/8/2018
-* Description        : 建立可物件化的PLCOpen Middleware
+* Date               : 05/11/2018
+* Description        : MC_Power FB
 ********************************************************************************
-* 說明：主要目標是建立一個可重覆使用在不同平台的 PLCOpen Middleware
+* 說明：MC_Power FB
 *******************************************************************************/
 /* Includes ------------------------------------------------------------------*/
 #include "MC_Power.h"
@@ -36,6 +36,10 @@ void MC_Power_updater(MC_Power_T *obj){
       obj->Valid = TRUE;
       obj->Error = FALSE;
       obj->ErrorID = WORD_NO_ERROR;
+      //由Disabled 轉移到Standstill   >>> Note5 <<<
+      if(obj->Axis->stat.FA_DISABLED == TRUE){
+        obj->Axis->setStat(obj->Axis,FA_STANDSTILL);
+      }
       break;
     }
     case(1):{
@@ -55,5 +59,14 @@ void MC_Power_updater(MC_Power_T *obj){
       break;
     }
   }
+  //Power enabled 由高轉低時，除了ErrorStop外的其他狀態全都轉移到Disabled
+  //正在跑的FB要變成 CommandAborted                     >>> Note2 <<<
+  if ( *(obj->Enable) == FALSE && obj->prevEnable == TRUE){
+    if(obj->Axis->stat.FA_ERRORSTOP == FALSE){
+      obj->Axis->setStat(obj->Axis,FA_DISABLED);
+      obj->Axis->CurrentFB = (void *)0;
+    }
+  }
+  (*obj).prevEnable = *(obj->Enable);
   //handle output
 }

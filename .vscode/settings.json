@@ -1,6 +1,6 @@
 {
   "terminal.integrated.env.osx": {
-    "PATH": "/Users/jo/.platformio/penv/bin:/Users/jo/.platformio/penv:/Users/jo/Downloads/google-cloud-sdk/bin:/anaconda3/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:/Applications/Wireshark.app/Contents/MacOS",
+    "PATH": "/Users/jo/.platformio/penv/bin:/Users/jo/.platformio/penv:/Users/jo/Downloads/google-cloud-sdk/bin:/Volumes/esp-open-sdk/esp-open-sdk/xtensa-lx106-elf/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:/Applications/Wireshark.app/Contents/MacOS",
     "PLATFORMIO_CALLER": "vscode"
   },
   "files.associations": {
@@ -19,6 +19,12 @@
     "ur.h": "c",
     "usart.h": "c",
     "string.h": "c",
-    "plcopen.h": "c"
+    "plcopen.h": "c",
+    "plcfbd.h": "c",
+    "plclogic.h": "c",
+    "mc_moveabsolute.h": "c",
+    "mc_halt.h": "c",
+    "mc_power.h": "c",
+    "mc_stop.h": "c"
   }
 }

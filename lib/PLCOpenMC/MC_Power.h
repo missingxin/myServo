@@ -1,17 +1,18 @@
-#ifndef __MC_POWER_H__
-#define __MC_POWER_H__
 /*******************************************************************************
-* File Name          : PLCOpen.h
+* File Name          : MC_Power.h
 * Author             : Joseph Lin
 * Version            : V0.0.1
-* Date               : 05/8/2018
-* Description        : 建立可物件化的PLCOpen Middleware
+* Date               : 05/11/2018
+* Description        : MC_Power FB
 ********************************************************************************
-* 說明：主要目標是建立一個可重覆使用在不同平台的 PLCOpen Middleware
+* 說明：MC_Power FB
 *******************************************************************************/
 /* Includes ------------------------------------------------------------------*/
-/* Private typedef -----------------------------------------------------------*/
+#ifndef __MC_POWER_H__
+#define __MC_POWER_H__
 #include "PLCOpen.h"
+/* Private typedef -----------------------------------------------------------*/
+
 typedef struct MC_Power_T MC_Power_T;
 void MC_Power_updater(MC_Power_T *obj);
 struct MC_Power_T{
@@ -24,6 +25,7 @@ struct MC_Power_T{
   BOOL Error;            //OUT B Signals that an error has occurred within the Function Block
   WORD ErrorID;          //OUT E Error identification
   void (*updater)(MC_Power_T* obj);
+  BOOL prevEnable;
 };
 
 

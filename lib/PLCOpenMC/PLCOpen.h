@@ -1,5 +1,3 @@
-#ifndef __PLCOPEN_MC_H__
-#define __PLCOPEN_MC_H__
 /*******************************************************************************
 * File Name          : PLCOpen.h
 * Author             : Joseph Lin
@@ -10,6 +8,9 @@
 * 說明：主要目標是建立一個可重覆使用在不同平台的 PLCOpen Middleware
 *******************************************************************************/
 /* Includes ------------------------------------------------------------------*/
+#ifndef __PLCOPEN_MC_H__
+#define __PLCOPEN_MC_H__
+#include "PLCLogic.h"
 /* Private typedef -----------------------------------------------------------*/
 #if !defined(BOOL)
 #define BOOL unsigned char
@@ -26,6 +27,16 @@
 #if !defined(REAL)
 #define REAL float
 #endif
+
+
+//輸入FB, 接受外部值, 更新時bypass, REAL
+typedef struct FBD_REAL_SOURCE_T FBD_REAL_SOURCE_T;
+struct FBD_REAL_SOURCE_T{
+  REAL IN;
+  REAL OUT;
+  void (*updater)(FBD_REAL_SOURCE_T* obj);
+  void (*assign)(FBD_REAL_SOURCE_T* obj, REAL val);
+};
 
 typedef enum{
   undefine, //0
@@ -84,12 +95,7 @@ struct AXIS_REF{
 };
 
 
-//立起指定stat, 倒下其他所有stat
-void setStat(AXIS_REF *axis, FA_STAT_NUM stat){
-  unsigned char i;
-  for(i=0;i<8;i++){ (*axis).stat.FA[i] = 0; }
-  (*axis).stat.FA[stat] = 1;
-}
+
 
 // ############################### Object Way ###############################
 

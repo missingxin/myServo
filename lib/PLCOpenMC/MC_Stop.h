@@ -1,17 +1,17 @@
-#ifndef __MC_STOP_H__
-#define __MC_STOP_H__
 /*******************************************************************************
-* File Name          : PLCOpen.h
+* File Name          : MC_Stop.h
 * Author             : Joseph Lin
 * Version            : V0.0.1
-* Date               : 05/8/2018
-* Description        : 建立可物件化的PLCOpen Middleware
+* Date               : 05/11/2018
+* Description        : MC_Stop FB
 ********************************************************************************
-* 說明：主要目標是建立一個可重覆使用在不同平台的 PLCOpen Middleware
+* 說明：MC_Stop FB
 *******************************************************************************/
 /* Includes ------------------------------------------------------------------*/
-/* Private typedef -----------------------------------------------------------*/
+#ifndef __MC_STOP_H__
+#define __MC_STOP_H__
 #include "PLCOpen.h"
+/* Private typedef -----------------------------------------------------------*/
 
 
 typedef struct MC_Stop_T MC_Stop_T;

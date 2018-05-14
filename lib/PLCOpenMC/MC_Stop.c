@@ -1,11 +1,11 @@
 /*******************************************************************************
-* File Name          : PLCOpen.c
+* File Name          : MC_Stop.c
 * Author             : Joseph Lin
 * Version            : V0.0.1
-* Date               : 05/8/2018
-* Description        : 建立可物件化的PLCOpen Middleware
+* Date               : 05/11/2018
+* Description        : MC_Stop FB
 ********************************************************************************
-* 說明：主要目標是建立一個可重覆使用在不同平台的 PLCOpen Middleware
+* 說明：MC_Stop FB
 *******************************************************************************/
 /* Includes ------------------------------------------------------------------*/
 #include "MC_Stop.h"
@@ -77,6 +77,8 @@ void MC_Stop_updater(MC_Stop_T *obj){
         break;
       }
     }
+  }else if(*(obj->Execute) == FALSE && obj->Done == TRUE){
+    obj->Axis->setStat(obj->Axis, FA_STANDSTILL);
   }
   obj->prevExecute = *(obj->Execute);
 }

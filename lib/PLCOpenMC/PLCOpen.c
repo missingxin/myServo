@@ -1,4 +1,4 @@
-/*******************************************************************************
+/******************************************************************************
 * File Name          : PLCOpen.c
 * Author             : Joseph Lin
 * Version            : V0.0.1
@@ -16,7 +16,12 @@
 #include "MC_MoveAbsolute.h"
 // ############################### Object Way ###############################
 
-
+//立起指定stat, 倒下其他所有stat
+void setStat(AXIS_REF *axis, FA_STAT_NUM stat){
+  unsigned char i;
+  for(i=0;i<8;i++){ (*axis).stat.FA[i] = 0; }
+  (*axis).stat.FA[stat] = 1;
+}
 
 
 
