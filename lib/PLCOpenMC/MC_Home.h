@@ -15,8 +15,9 @@
 
 
 typedef struct MC_Home_T MC_Home_T;
-void MC_Home_updater(MC_Home_T *obj);
+void MC_Home_updater(void *obj);
 struct MC_Home_T{
+  void (*updater)(void* obj);
   AXIS_REF *Axis;             //I/O B axis
   BOOL *Execute;              //IN  B Start the motion at rising edge
   REAL *Position;             //IN  E Defines the chronological sequence of the FB. See 2.4.2 Aborting versus Buffered modes
@@ -27,7 +28,6 @@ struct MC_Home_T{
   BOOL CommandAborted;        //OUT E ‘Command’ is aborted by another command
   BOOL Error;                 //OUT E Signals that an error has occurred within the Function Block
   WORD ErrorID;               //OUT E Error identification
-  void (*updater)(MC_Home_T* obj);
   BOOL prevExecute;           //Internal use, to cache previous Execute value, so we can capture the rising edge.
 };
 

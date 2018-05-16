@@ -26,7 +26,8 @@ extern unsigned char DEV_Power(
 
 
 //物件更新器
-void MC_Power_updater(MC_Power_T *obj){
+void MC_Power_updater(void *iobj){
+  MC_Power_T* obj = (MC_Power_T*) iobj;
   //handle input
   unsigned char res = DEV_Power(obj->Axis, *(obj->Enable), *(obj->EnablePositive), *(obj->EnableNegative));
   switch (res){

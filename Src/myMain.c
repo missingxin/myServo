@@ -13,6 +13,9 @@
 *******************************************************************************/
 
 /* Includes ------------------------------------------------------------------*/
+#include <stdio.h>
+#include <stdlib.h>
+
 #include "main.h"
 #include "stm32f1xx_hal.h"
 #include "tim.h"
@@ -20,9 +23,9 @@
 #include "gpio.h"
 #include "myMain.h"
 #include "myServo.h"
-#include "ur.h"
 
 #include "PLCOpen.h"
+#include "PLCLogic.h"
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 #define PWM_Period 60000
@@ -32,6 +35,21 @@
 // uint16_t UpdateAngle(float angle){ return (uint16_t)(angle*33.33333333333333f + 4500); } //previous code
 
 /* Private macro -------------------------------------------------------------*/
+
+// ** 把printf的輸出指向uart2, 另外還需要把syscalls.c放進來編譯 **
+#ifdef __GNUC__
+#define PUTCHAR_PROTOTYPE int __io_putchar(int ch)
+#else
+#define PUTCHAR_PROTOTYPE int fputc(int ch, FILE *f)
+#endif /* __GNUC__ */
+ 
+PUTCHAR_PROTOTYPE
+{
+  HAL_UART_Transmit(&huart2, (uint8_t *)&ch, 1, 0xFFFF);
+  return ch;
+}
+asm(".global _printf_float");  //或 linker flag 加入 “-u _printf_float” 
+
 /* Private function prototypes -----------------------------------------------*/
 // 1. #########  更新 servo 角度所需要的 callback 實體 #########
 //    由於不確定 SFR ptr 的存取是否可以跨平台，所以目前 servo 選擇TIM channel /控制 PWM 的動作都包在這裡
@@ -74,6 +92,10 @@ void servoUpdate(){
   ServoTimerCallback(&servo4);
   ServoTimerCallback(&servo5);
 }
+
+
+
+
 /*******************************************************************************
 * Function Name  : myMain
 * Description    : real main function.
@@ -82,7 +104,9 @@ void servoUpdate(){
 * Return         : None
 *******************************************************************************
 *******************************************************************************/
+
 void myMain(){
+
   // 初始化 servo 使用的 TIM channel 和 callback timer.
   HAL_TIM_Base_Start_IT(&htim2);
   HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
@@ -95,11 +119,82 @@ void myMain(){
   htim4.Instance->ARR = PWM_Period;
 
 
+//目前先手動打造表格，完成驗證後再將表格格式化
+  FUNCTION_BLOCK_PAGE_T *FBP_Pool[50];
+//1 建立一張儲存所有FB的表
+  INPUT_SOURCE_BOOL_T *input1 = malloc(sizeof(INPUT_SOURCE_BOOL_T));
+  *input1 = (INPUT_SOURCE_BOOL_T){INPUT_SOURCE_BOOL_updater, INPUT_SOURCE_BOOL_assign, 0, 0};
+
+  INPUT_SOURCE_BOOL_T *input2 = malloc(sizeof(INPUT_SOURCE_BOOL_T));
+  *input2 = (INPUT_SOURCE_BOOL_T){INPUT_SOURCE_BOOL_updater, INPUT_SOURCE_BOOL_assign, 0, 0};
+
+  FBD_IIO_T *and1 = malloc(sizeof(FBD_IIO_T));
+  *and1 = (FBD_IIO_T){LOGIC_AND_updater,0,0,0};
+
+//2 指定所有連結方法
+  FBP_Pool[0] = malloc(sizeof(FUNCTION_BLOCK_PAGE_T));
+  *FBP_Pool[0] = (FUNCTION_BLOCK_PAGE_T){(FUNCTION_BLOCK_T*)input1,0,0,{},0,(FB_INPUT_LINK_T * )0};
+
+  FBP_Pool[1]= malloc(sizeof(FUNCTION_BLOCK_PAGE_T));
+  *FBP_Pool[1] = (FUNCTION_BLOCK_PAGE_T){(FUNCTION_BLOCK_T*)input2,0,0,{},0,(FB_INPUT_LINK_T * )0};
+
+  FBP_Pool[2] = malloc(sizeof(FUNCTION_BLOCK_PAGE_T));
+  *FBP_Pool[2] = (FUNCTION_BLOCK_PAGE_T){(FUNCTION_BLOCK_T*)and1,0,0,{},0,(FB_INPUT_LINK_T * )0};
 
 
+//3 連接
+
+
+  printf("FBP_Pool[0]->obj = %d\r\n", (int)FBP_Pool[0]->obj);
+  printf("FBP_Pool[1]->obj = %d\r\n", (int)FBP_Pool[1]->obj);
+  printf("FBP_Pool[2]->obj = %d\r\n", (int)FBP_Pool[2]->obj);
+
+  (*(FBD_IIO_T *)FBP_Pool[2]->obj).IN1 = &((*(INPUT_SOURCE_BOOL_T *)FBP_Pool[0]->obj).OUT);
+  (*(FBD_IIO_T *)FBP_Pool[2]->obj).IN2 = &((*(INPUT_SOURCE_BOOL_T *)FBP_Pool[1]->obj).OUT);
+
+  //更新方式，目前暫定放在 super loop 的 execution phace 裡
+  unsigned char i1,i2;
+  i1 = 0;
+  i2 = 0;
+  (*(INPUT_SOURCE_BOOL_T *)FBP_Pool[0]->obj).assign(FBP_Pool[0]->obj,i1);
+  (*(INPUT_SOURCE_BOOL_T *)FBP_Pool[1]->obj).assign(FBP_Pool[1]->obj,i2);
+  FBP_Pool[0]->obj->updater(FBP_Pool[0]->obj);
+  FBP_Pool[1]->obj->updater(FBP_Pool[1]->obj);
+  FBP_Pool[2]->obj->updater(FBP_Pool[2]->obj);
+  
+  i1 = 0;
+  i2 = 1;
+  (*(INPUT_SOURCE_BOOL_T *)FBP_Pool[0]->obj).assign(FBP_Pool[0]->obj,i1);
+  (*(INPUT_SOURCE_BOOL_T *)FBP_Pool[1]->obj).assign(FBP_Pool[1]->obj,i2);
+  FBP_Pool[0]->obj->updater(FBP_Pool[0]->obj);
+  FBP_Pool[1]->obj->updater(FBP_Pool[1]->obj);
+  FBP_Pool[2]->obj->updater(FBP_Pool[2]->obj);
+
+  i1 = 1;
+  i2 = 0;
+  (*(INPUT_SOURCE_BOOL_T *)FBP_Pool[0]->obj).assign(FBP_Pool[0]->obj,i1);
+  (*(INPUT_SOURCE_BOOL_T *)FBP_Pool[1]->obj).assign(FBP_Pool[1]->obj,i2);
+  FBP_Pool[0]->obj->updater(FBP_Pool[0]->obj);
+  FBP_Pool[1]->obj->updater(FBP_Pool[1]->obj);
+  FBP_Pool[2]->obj->updater(FBP_Pool[2]->obj);
+  
+  i1 = 1;
+  i2 = 1;
+  (*(INPUT_SOURCE_BOOL_T *)FBP_Pool[0]->obj).assign(FBP_Pool[0]->obj,i1);
+  (*(INPUT_SOURCE_BOOL_T *)FBP_Pool[1]->obj).assign(FBP_Pool[1]->obj,i2);
+  FBP_Pool[0]->obj->updater(FBP_Pool[0]->obj);
+  FBP_Pool[1]->obj->updater(FBP_Pool[1]->obj);
+  FBP_Pool[2]->obj->updater(FBP_Pool[2]->obj);
+  
+
+
+
+
+
+  while(1);
   //開始使用各個servo. 先來個很醜的
   while(1){
-
+    
     GotoAngleInMs(&servo0,-30, 500); GotoAngleInMs(&servo1,-60, 500); GotoAngleInMs(&servo2,-50, 500); GotoAngleInMs(&servo3,-40, 500); GotoAngleInMs(&servo4,-30, 500); GotoAngleInMs(&servo5,-20, 500); HAL_Delay(500);
     GotoAngleInMs(&servo0, 30,1000); GotoAngleInMs(&servo1, 60,1000); GotoAngleInMs(&servo2, 50,1000); GotoAngleInMs(&servo3, 40,1000); GotoAngleInMs(&servo4, 30,1000); GotoAngleInMs(&servo5, 20,1000); HAL_Delay(1000);
     GotoAngleInMs(&servo0,  0, 500); GotoAngleInMs(&servo1,  0, 500); GotoAngleInMs(&servo2,  0, 500); GotoAngleInMs(&servo3,  0, 500); GotoAngleInMs(&servo4,  0, 500); GotoAngleInMs(&servo5,  0, 500); HAL_Delay(500);

@@ -29,7 +29,8 @@ extern unsigned char DEV_Halt(
 
 
 //######### 輸入輸出及狀態管理器 ####################
-void MC_Halt_updater(MC_Halt_T *obj){
+void MC_Halt_updater(void *iobj){
+  MC_Halt_T* obj = (MC_Halt_T*) iobj;
   if(obj->Axis->power == FALSE){
       //忽然停電
       obj->Done = FALSE;

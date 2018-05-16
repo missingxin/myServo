@@ -27,7 +27,8 @@ extern unsigned char DEV_Home(
 
 
 //######### 輸入輸出及狀態管理器 ####################
-void MC_Home_updater(MC_Home_T *obj){
+void MC_Home_updater(void *iobj){
+  MC_Home_T* obj = (MC_Home_T*) iobj;
   if(obj->Axis->power == FALSE){
       //忽然停電
       obj->Done = FALSE;

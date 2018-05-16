@@ -31,10 +31,10 @@
 //輸入FB, 接受外部值, 更新時bypass, REAL, 因目前只會在這裡使用，所以做在這裡
 typedef struct INPUT_SOURCE_REAL_T INPUT_SOURCE_REAL_T;
 struct INPUT_SOURCE_REAL_T{
+  void (*updater)(void* obj);
+  void (*assign)(void* obj, REAL val);
   REAL IN;
   REAL OUT;
-  void (*updater)(INPUT_SOURCE_REAL_T* obj);
-  void (*assign)(INPUT_SOURCE_REAL_T* obj, REAL val);
 };
 
 typedef enum{
@@ -91,8 +91,8 @@ struct AXIS_REF{
   void (*setStat)(AXIS_REF *axis, FA_STAT_NUM stat);
 };
 
-void INPUT_SOURCE_REAL_assign(INPUT_SOURCE_REAL_T* obj, REAL val);
-void INPUT_SOURCE_REAL_updater(INPUT_SOURCE_REAL_T* obj);
+void INPUT_SOURCE_REAL_assign(void* obj, REAL val);
+void INPUT_SOURCE_REAL_updater(void* obj);
 void setStat(AXIS_REF *axis, FA_STAT_NUM stat);
 
 

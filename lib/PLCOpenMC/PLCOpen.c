@@ -18,12 +18,14 @@
 
 
 //######### 指令傳入參數 ####################
-void INPUT_SOURCE_REAL_assign(INPUT_SOURCE_REAL_T* obj, REAL val){
+void INPUT_SOURCE_REAL_assign(void* iobj, REAL val){
+  INPUT_SOURCE_REAL_T* obj = (INPUT_SOURCE_REAL_T*) iobj;
   (*obj).IN = val;
 }
 
 //######### 輸入輸出及狀態管理器 ####################
-void INPUT_SOURCE_REAL_updater(INPUT_SOURCE_REAL_T* obj){
+void INPUT_SOURCE_REAL_updater(void* iobj){
+  INPUT_SOURCE_REAL_T* obj = (INPUT_SOURCE_REAL_T*) iobj;
   (*obj).OUT = obj->IN;
 }
 

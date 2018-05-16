@@ -33,7 +33,8 @@ extern unsigned char DEV_MoveAbsolute(
 
 
 //######### 輸入輸出及狀態管理器 ####################
-void MC_Home_updater(MC_MoveAbsolute_T *obj){
+void MC_Home_updater(void *iobj){
+  MC_MoveAbsolute_T* obj = (MC_MoveAbsolute_T*) iobj;
   if(obj->Axis->power == FALSE){
       //忽然停電
       obj->Done = FALSE;

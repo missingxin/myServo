@@ -25,6 +25,7 @@
     "mc_moveabsolute.h": "c",
     "mc_halt.h": "c",
     "mc_power.h": "c",
-    "mc_stop.h": "c"
+    "mc_stop.h": "c",
+    "stdio.h": "c"
   }
 }

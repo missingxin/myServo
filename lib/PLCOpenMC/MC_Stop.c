@@ -25,7 +25,8 @@ extern unsigned char DEV_Stop(
   REAL jerk
 );
 
-void MC_Stop_updater(MC_Stop_T *obj){
+void MC_Stop_updater(void *iobj){
+  MC_Stop_T* obj = (MC_Stop_T*) iobj;
   if(obj->Axis->power == FALSE){
     //斷電，放棄所有動作而且指出CommandAborted
       obj->Done = FALSE;

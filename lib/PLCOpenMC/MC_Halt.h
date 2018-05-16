@@ -15,8 +15,9 @@
 
 
 typedef struct MC_Halt_T MC_Halt_T;
-void MC_Halt_updater(MC_Halt_T *obj);
+void MC_Halt_updater(void *obj);
 struct MC_Halt_T{
+  void (*updater)(void* obj);
   AXIS_REF *Axis;             //I/O B axis
   BOOL *Execute;              //IN  B Start the motion at rising edge
   REAL *Deceleration;         //IN  E Value of the ‘Deceleration’ [u/s2]
@@ -28,7 +29,6 @@ struct MC_Halt_T{
   BOOL CommandAborted;        //OUT E ‘Command’ is aborted by another command
   BOOL Error;                 //OUT E Signals that an error has occurred within the Function Block
   WORD ErrorID;               //OUT E Error identification
-  void (*updater)(MC_Halt_T* obj);
   BOOL prevExecute;           //Internal use, to cache previous Execute value, so we can capture the rising edge.
 };
 
