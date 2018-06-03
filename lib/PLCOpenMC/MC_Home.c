@@ -1,8 +1,8 @@
 /*******************************************************************************
 * File Name          : MC_Home.c
 * Author             : Joseph Lin
-* Version            : V0.0.1
-* Date               : 05/11/2018
+* Version            : V0.0.2
+* Date               : 06/3/2018
 * Description        : MC_Home FB
 ********************************************************************************
 * 說明：MC_Home FB
@@ -11,24 +11,11 @@
 #include "MC_Home.h"
 // ############################### Object Way ###############################
 
-//######### 需要額外實作的功能 ####################
-//呼叫一個可以持續被呼叫的函式，
-//目的：當doing為0時表示為一個新的hoem指令
-//             TRUE時表示是一個正在跑的指令，需要查詢它的狀態
-//回傳0時表示完成且無錯誤
-//回傳1時表示進行中
-//回傳2時表示有錯誤且已停止
-extern unsigned char DEV_Home(
-  AXIS_REF * axis, 
-  BOOL doing,
-  REAL position
-);
-
-
 
 //######### 輸入輸出及狀態管理器 ####################
 void MC_Home_updater(void *iobj){
-  MC_Home_T* obj = (MC_Home_T*) iobj;
+  MC_Home_t* obj;
+  obj = (MC_Home_t*) iobj;
   if(obj->Axis->power == FALSE){
       //忽然停電
       obj->Done = FALSE;
@@ -56,7 +43,7 @@ void MC_Home_updater(void *iobj){
 
 
   if (obj->Active){
-    unsigned char res = DEV_Home(obj->Axis, obj->Busy, *(obj->Position));
+    unsigned char res = obj->Axis->callHome(obj->Axis, obj->Busy, *(obj->Position));
     switch (res){
       case(0):{
         //完成
@@ -99,3 +86,43 @@ void MC_Home_updater(void *iobj){
     }
   }
 }
+
+
+void FB_ADD_MC_HOME_PAGE(
+  FUNCTION_BLOCK_PAGE_t ** fpool,
+  unsigned char *fpoolCount)
+{
+  MC_Home_t *fbobj =  malloc(sizeof(MC_Home_t));
+  *fbobj = (MC_Home_t){MC_Home_updater, 
+  malloc(sizeof(void ***)*4),  //C inList
+  malloc(sizeof(void **)*7),   //C outList
+  4, //C  inNumber
+  7, //C  outNumber
+  0, //IO axis 
+  0, //I  Execute
+  0, //I  Position
+  0, //I  BufferMode
+  0, //O  Done
+  0, //O  Busy
+  0, //O  Active
+  0, //O  CommandAborted
+  0, //O  Error
+  0, //O  ErrorID
+  0  //C  prevEnable, internel use
+  };
+  ((*fbobj).inList)[0] = (void **)&(fbobj->Axis);
+  ((*fbobj).inList)[1] = (void **)&(fbobj->Execute);
+  ((*fbobj).inList)[2] = (void **)&(fbobj->Position);
+  ((*fbobj).inList)[3] = (void **)&(fbobj->BufferMode);
+  ((*fbobj).outList)[0] = (fbobj->Axis);
+  ((*fbobj).outList)[1] = &(fbobj->Done);
+  ((*fbobj).outList)[2] = &(fbobj->Busy);
+  ((*fbobj).outList)[3] = &(fbobj->Active);
+  ((*fbobj).outList)[4] = &(fbobj->CommandAborted);
+  ((*fbobj).outList)[5] = &(fbobj->Error);
+  ((*fbobj).outList)[6] = &(fbobj->ErrorID);
+  FUNCTION_BLOCK_PAGE_t* newPage = createPage((FUNCTION_BLOCK_t*)fbobj,bt_MC_Home);
+  *(fpool+*fpoolCount) = newPage;
+  *fpoolCount = *fpoolCount +1;
+}
+

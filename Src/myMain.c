@@ -95,18 +95,7 @@ void servoUpdate(){
 
 
 
-
-/*******************************************************************************
-* Function Name  : myMain
-* Description    : real main function.
-* Input          : None
-* Output         : None
-* Return         : None
-*******************************************************************************
-*******************************************************************************/
-
-void myMain(){
-
+void manualInit(){
   // 初始化 servo 使用的 TIM channel 和 callback timer.
   HAL_TIM_Base_Start_IT(&htim2);
   HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
@@ -117,104 +106,161 @@ void myMain(){
   HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_2);
   htim3.Instance->ARR = PWM_Period;
   htim4.Instance->ARR = PWM_Period;
+}
 
+/*******************************************************************************
+* Function Name  : myMain
+* Description    : real main function.
+* Input          : None
+* Output         : None
+* Return         : None
+*******************************************************************************
+*******************************************************************************/
+void myMain(){
+  manualInit();
+
+
+  unsigned char createGraphCommand[] = {
+    2,6,6,
+        //pure input
+            bt_Input_Bool, 0,
+            bt_Input_Bool, 0,
+        //operent fb
+            bt_Logic_And,   2, 0,0,0, 1,1,0,
+            bt_Logic_Or,    2, 0,0,0, 1,1,0,
+            bt_Logic_Nand,  2, 0,0,0, 1,1,0,
+            bt_Logic_Nor,   2, 0,0,0, 1,1,0,
+            bt_Logic_Xor,   2, 0,0,0, 1,1,0,
+            bt_Logic_Xnor,  2, 0,0,0, 1,1,0,
+        //pure output
+            bt_Output_Bool, 1, 0,2,0,
+            bt_Output_Bool, 1, 0,3,0,
+            bt_Output_Bool, 1, 0,4,0,
+            bt_Output_Bool, 1, 0,5,0,
+            bt_Output_Bool, 1, 0,6,0,
+            bt_Output_Bool, 1, 0,7,0
+  };
+  unsigned char a  = createGraphCommand[0]; //get rud of warning
+  createGraphCommand[0] = a; 
 
 //目前先手動打造表格，完成驗證後再將表格格式化
-  FUNCTION_BLOCK_PAGE_T *FBP_Pool[50];
+  FUNCTION_BLOCK_PAGE_t *FBP_Pool[50];
+  FUNCTION_BLOCK_PAGE_t *INPUT_Pool[50];
+  FUNCTION_BLOCK_PAGE_t *OUTPUT_Pool[50];
+  unsigned char FBP_cnt = 0;
+  unsigned char INPUT_cnt = 0;
+  unsigned char OUTPUT_cnt = 0;
 //1 建立一張儲存所有FB的表
-  INPUT_SOURCE_BOOL_T *input1 = malloc(sizeof(INPUT_SOURCE_BOOL_T));
-  *input1 = (INPUT_SOURCE_BOOL_T){INPUT_SOURCE_BOOL_updater, INPUT_SOURCE_BOOL_assign, 0, 0};
+//  INPUT_BOOL_t *input1 = FB_Create_INPUT_BOOL(0, 0);
+//  INPUT_BOOL_t *input2 = FB_Create_INPUT_BOOL(0, 0);
+//  FBD_AND_t *and1 = FB_Create_AND(0,0,0);
+//  OUTPUT_BOOL_t *out = FB_Create_OUTPUT_BOOL(0,0);
 
-  INPUT_SOURCE_BOOL_T *input2 = malloc(sizeof(INPUT_SOURCE_BOOL_T));
-  *input2 = (INPUT_SOURCE_BOOL_T){INPUT_SOURCE_BOOL_updater, INPUT_SOURCE_BOOL_assign, 0, 0};
-
-  FBD_IIO_T *and1 = malloc(sizeof(FBD_IIO_T));
-  *and1 = (FBD_IIO_T){LOGIC_AND_updater,0,0,0};
+// 建立指定FB
+  printf("Create FBs\r\n");
+  FB_ADD_AXIS_PAGE(FBP_Pool,&FBP_cnt);
+  FB_ADD_INPUT_BOOL_PAGE(FBP_Pool,&FBP_cnt,INPUT_Pool,&INPUT_cnt);
+  FB_ADD_INPUT_BOOL_PAGE(FBP_Pool,&FBP_cnt,INPUT_Pool,&INPUT_cnt);
+  FB_ADD_MC_POWER_PAGE(FBP_Pool,&FBP_cnt);
+  FB_ADD_AND_PAGE (FBP_Pool,&FBP_cnt);
+  FB_ADD_OR_PAGE  (FBP_Pool,&FBP_cnt);
+  FB_ADD_XOR_PAGE (FBP_Pool,&FBP_cnt);
+  FB_ADD_OUTPUT_BOOL_PAGE(FBP_Pool,&FBP_cnt,OUTPUT_Pool,&OUTPUT_cnt);
+  FB_ADD_OUTPUT_BOOL_PAGE(FBP_Pool,&FBP_cnt,OUTPUT_Pool,&OUTPUT_cnt);
+  FB_ADD_OUTPUT_BOOL_PAGE(FBP_Pool,&FBP_cnt,OUTPUT_Pool,&OUTPUT_cnt);
+  FB_ADD_OUTPUT_BOOL_PAGE(FBP_Pool,&FBP_cnt,OUTPUT_Pool,&OUTPUT_cnt);
+  
 
 //2 指定所有連結方法
-  FBP_Pool[0] = malloc(sizeof(FUNCTION_BLOCK_PAGE_T));
-  *FBP_Pool[0] = (FUNCTION_BLOCK_PAGE_T){(FUNCTION_BLOCK_T*)input1,0,0,{},0,(FB_INPUT_LINK_T * )0};
-
-  FBP_Pool[1]= malloc(sizeof(FUNCTION_BLOCK_PAGE_T));
-  *FBP_Pool[1] = (FUNCTION_BLOCK_PAGE_T){(FUNCTION_BLOCK_T*)input2,0,0,{},0,(FB_INPUT_LINK_T * )0};
-
-  FBP_Pool[2] = malloc(sizeof(FUNCTION_BLOCK_PAGE_T));
-  *FBP_Pool[2] = (FUNCTION_BLOCK_PAGE_T){(FUNCTION_BLOCK_T*)and1,0,0,{},0,(FB_INPUT_LINK_T * )0};
-
-
+  printf("Create LinkTable\r\n");
+  FB_INPUT_LINK_t ffaxis[4] = {{0,0,0},{1,1,0},{2,2,0},{3,2,0}};
+  FB_INPUT_LINK_t ff[2] = {{0,1,0},{1,2,0}};
+  FB_INPUT_LINK_t ff2[1] = {{0,3,1}};
+  FB_INPUT_LINK_t ff3[1] = {{0,4,0}};
+  FB_INPUT_LINK_t ff4[1] = {{0,5,0}};
+  FB_INPUT_LINK_t ff5[1] = {{0,6,0}};
+  setLinkTable(FBP_Pool,0,0,0); //in
+  setLinkTable(FBP_Pool,1,0,0); //in
+  setLinkTable(FBP_Pool,2,0,0); //in
+  setLinkTable(FBP_Pool,3,ffaxis,4); //fb
+  setLinkTable(FBP_Pool,4,ff,2); //fb
+  setLinkTable(FBP_Pool,5,ff,2); //fb
+  setLinkTable(FBP_Pool,6,ff,2); //fb
+  setLinkTable(FBP_Pool,7,ff2,1); //out
+  setLinkTable(FBP_Pool,8,ff3,1); //out
+  setLinkTable(FBP_Pool,9,ff4,1); //out
+  setLinkTable(FBP_Pool,10,ff5,1); //out
+  
 //3 連接
+  printf("Link FBs according to linkTable\r\n");
+  linkLinkTable(FBP_Pool,FBP_cnt);
 
 
-  printf("FBP_Pool[0]->obj = %d\r\n", (int)FBP_Pool[0]->obj);
-  printf("FBP_Pool[1]->obj = %d\r\n", (int)FBP_Pool[1]->obj);
-  printf("FBP_Pool[2]->obj = %d\r\n", (int)FBP_Pool[2]->obj);
 
-  (*(FBD_IIO_T *)FBP_Pool[2]->obj).IN1 = &((*(INPUT_SOURCE_BOOL_T *)FBP_Pool[0]->obj).OUT);
-  (*(FBD_IIO_T *)FBP_Pool[2]->obj).IN2 = &((*(INPUT_SOURCE_BOOL_T *)FBP_Pool[1]->obj).OUT);
+  //4. 更新共驗證，目前暫定放在 super loop 的 execution phace 裡
+  printf("Update 1\r\n");
+  setInputBool(INPUT_Pool,0,0);
+  setInputBool(INPUT_Pool,1,0);
+  updateFBS(FBP_Pool,FBP_cnt);
 
-  //更新方式，目前暫定放在 super loop 的 execution phace 裡
-  unsigned char i1,i2;
-  i1 = 0;
-  i2 = 0;
-  (*(INPUT_SOURCE_BOOL_T *)FBP_Pool[0]->obj).assign(FBP_Pool[0]->obj,i1);
-  (*(INPUT_SOURCE_BOOL_T *)FBP_Pool[1]->obj).assign(FBP_Pool[1]->obj,i2);
-  FBP_Pool[0]->obj->updater(FBP_Pool[0]->obj);
-  FBP_Pool[1]->obj->updater(FBP_Pool[1]->obj);
-  FBP_Pool[2]->obj->updater(FBP_Pool[2]->obj);
-  
-  i1 = 0;
-  i2 = 1;
-  (*(INPUT_SOURCE_BOOL_T *)FBP_Pool[0]->obj).assign(FBP_Pool[0]->obj,i1);
-  (*(INPUT_SOURCE_BOOL_T *)FBP_Pool[1]->obj).assign(FBP_Pool[1]->obj,i2);
-  FBP_Pool[0]->obj->updater(FBP_Pool[0]->obj);
-  FBP_Pool[1]->obj->updater(FBP_Pool[1]->obj);
-  FBP_Pool[2]->obj->updater(FBP_Pool[2]->obj);
-
-  i1 = 1;
-  i2 = 0;
-  (*(INPUT_SOURCE_BOOL_T *)FBP_Pool[0]->obj).assign(FBP_Pool[0]->obj,i1);
-  (*(INPUT_SOURCE_BOOL_T *)FBP_Pool[1]->obj).assign(FBP_Pool[1]->obj,i2);
-  FBP_Pool[0]->obj->updater(FBP_Pool[0]->obj);
-  FBP_Pool[1]->obj->updater(FBP_Pool[1]->obj);
-  FBP_Pool[2]->obj->updater(FBP_Pool[2]->obj);
-  
-  i1 = 1;
-  i2 = 1;
-  (*(INPUT_SOURCE_BOOL_T *)FBP_Pool[0]->obj).assign(FBP_Pool[0]->obj,i1);
-  (*(INPUT_SOURCE_BOOL_T *)FBP_Pool[1]->obj).assign(FBP_Pool[1]->obj,i2);
-  FBP_Pool[0]->obj->updater(FBP_Pool[0]->obj);
-  FBP_Pool[1]->obj->updater(FBP_Pool[1]->obj);
-  FBP_Pool[2]->obj->updater(FBP_Pool[2]->obj);
+  dump_INPUT(INPUT_Pool,INPUT_cnt);
+  dump_OUTPUT(OUTPUT_Pool,OUTPUT_cnt);
   
 
+  printf("Update 2\r\n");
+  setInputBool(INPUT_Pool,0,0);
+  setInputBool(INPUT_Pool,1,1);
+  updateFBS(FBP_Pool,FBP_cnt);
 
+  dump_INPUT(INPUT_Pool,INPUT_cnt);
+  dump_OUTPUT(OUTPUT_Pool,OUTPUT_cnt);
+  
 
+  printf("Update 3\r\n");
+  setInputBool(INPUT_Pool,0,1);
+  setInputBool(INPUT_Pool,1,0);
+  updateFBS(FBP_Pool,FBP_cnt);
 
+  dump_INPUT(INPUT_Pool,INPUT_cnt);
+  dump_OUTPUT(OUTPUT_Pool,OUTPUT_cnt);
+  
+
+  printf("Update 4\r\n");
+  setInputBool(INPUT_Pool,0,1);
+  setInputBool(INPUT_Pool,1,1);
+  updateFBS(FBP_Pool,FBP_cnt);
+
+  dump_INPUT(INPUT_Pool,INPUT_cnt);
+  dump_OUTPUT(OUTPUT_Pool,OUTPUT_cnt);
+  
+  //printf("dump_PAGE\r\n");
+  //dump_PAGE(FBP_Pool,FBP_cnt);
+  while(1);
 
   while(1);
   //開始使用各個servo. 先來個很醜的
   while(1){
     
-    GotoAngleInMs(&servo0,-30, 500); GotoAngleInMs(&servo1,-60, 500); GotoAngleInMs(&servo2,-50, 500); GotoAngleInMs(&servo3,-40, 500); GotoAngleInMs(&servo4,-30, 500); GotoAngleInMs(&servo5,-20, 500); HAL_Delay(500);
-    GotoAngleInMs(&servo0, 30,1000); GotoAngleInMs(&servo1, 60,1000); GotoAngleInMs(&servo2, 50,1000); GotoAngleInMs(&servo3, 40,1000); GotoAngleInMs(&servo4, 30,1000); GotoAngleInMs(&servo5, 20,1000); HAL_Delay(1000);
-    GotoAngleInMs(&servo0,  0, 500); GotoAngleInMs(&servo1,  0, 500); GotoAngleInMs(&servo2,  0, 500); GotoAngleInMs(&servo3,  0, 500); GotoAngleInMs(&servo4,  0, 500); GotoAngleInMs(&servo5,  0, 500); HAL_Delay(500);
-    GotoAngleInMs(&servo0,-30, 500); GotoAngleInMs(&servo1,-60, 500); GotoAngleInMs(&servo2,-50, 500); GotoAngleInMs(&servo3,-40, 500); GotoAngleInMs(&servo4,-30, 500); GotoAngleInMs(&servo5,-20, 500); HAL_Delay(500);
-    GotoAngleInMs(&servo0, 30,1000); GotoAngleInMs(&servo1, 60,1000); GotoAngleInMs(&servo2, 50,1000); GotoAngleInMs(&servo3, 40,1000); GotoAngleInMs(&servo4, 30,1000); GotoAngleInMs(&servo5, 20,1000); HAL_Delay(1000);
-    GotoAngleInMs(&servo0,  0, 500); GotoAngleInMs(&servo1,  0, 500); GotoAngleInMs(&servo2,  0, 500); GotoAngleInMs(&servo3,  0, 500); GotoAngleInMs(&servo4,  0, 500); GotoAngleInMs(&servo5,  0, 500); HAL_Delay(500);
+    // GotoAngleInMs(&servo0,-30, 500); GotoAngleInMs(&servo1,-60, 500); GotoAngleInMs(&servo2,-50, 500); GotoAngleInMs(&servo3,-40, 500); GotoAngleInMs(&servo4,-30, 500); GotoAngleInMs(&servo5,-20, 500); HAL_Delay(500);
+    // GotoAngleInMs(&servo0, 30,1000); GotoAngleInMs(&servo1, 60,1000); GotoAngleInMs(&servo2, 50,1000); GotoAngleInMs(&servo3, 40,1000); GotoAngleInMs(&servo4, 30,1000); GotoAngleInMs(&servo5, 20,1000); HAL_Delay(1000);
+    // GotoAngleInMs(&servo0,  0, 500); GotoAngleInMs(&servo1,  0, 500); GotoAngleInMs(&servo2,  0, 500); GotoAngleInMs(&servo3,  0, 500); GotoAngleInMs(&servo4,  0, 500); GotoAngleInMs(&servo5,  0, 500); HAL_Delay(500);
+    // GotoAngleInMs(&servo0,-30, 500); GotoAngleInMs(&servo1,-60, 500); GotoAngleInMs(&servo2,-50, 500); GotoAngleInMs(&servo3,-40, 500); GotoAngleInMs(&servo4,-30, 500); GotoAngleInMs(&servo5,-20, 500); HAL_Delay(500);
+    // GotoAngleInMs(&servo0, 30,1000); GotoAngleInMs(&servo1, 60,1000); GotoAngleInMs(&servo2, 50,1000); GotoAngleInMs(&servo3, 40,1000); GotoAngleInMs(&servo4, 30,1000); GotoAngleInMs(&servo5, 20,1000); HAL_Delay(1000);
+    // GotoAngleInMs(&servo0,  0, 500); GotoAngleInMs(&servo1,  0, 500); GotoAngleInMs(&servo2,  0, 500); GotoAngleInMs(&servo3,  0, 500); GotoAngleInMs(&servo4,  0, 500); GotoAngleInMs(&servo5,  0, 500); HAL_Delay(500);
  
-    GotoAngleInMs(&servo1,-80,1000); GotoAngleInMs(&servo2,-60,1000); GotoAngleInMs(&servo5,-50,1000); HAL_Delay(1000);
-    GotoAngleInMs(&servo1, 80,2000); GotoAngleInMs(&servo2, 60,2000); GotoAngleInMs(&servo5, 50,2000); HAL_Delay(2000);
-    GotoAngleInMs(&servo1,  0,1000); GotoAngleInMs(&servo2,  0,1000); GotoAngleInMs(&servo5,  0,1000); HAL_Delay(1000);
-    GotoAngleInMs(&servo1,-80,1000); GotoAngleInMs(&servo2,-60,1000); GotoAngleInMs(&servo5,-50,1000); HAL_Delay(1000);
-    GotoAngleInMs(&servo1, 80,2000); GotoAngleInMs(&servo2, 60,2000); GotoAngleInMs(&servo5, 50,2000); HAL_Delay(2000);
-    GotoAngleInMs(&servo1,  0,1000); GotoAngleInMs(&servo2,  0,1000); GotoAngleInMs(&servo5,  0,1000); HAL_Delay(1000);
+    // GotoAngleInMs(&servo1,-80,1000); GotoAngleInMs(&servo2,-60,1000); GotoAngleInMs(&servo5,-50,1000); HAL_Delay(1000);
+    // GotoAngleInMs(&servo1, 80,2000); GotoAngleInMs(&servo2, 60,2000); GotoAngleInMs(&servo5, 50,2000); HAL_Delay(2000);
+    // GotoAngleInMs(&servo1,  0,1000); GotoAngleInMs(&servo2,  0,1000); GotoAngleInMs(&servo5,  0,1000); HAL_Delay(1000);
+    // GotoAngleInMs(&servo1,-80,1000); GotoAngleInMs(&servo2,-60,1000); GotoAngleInMs(&servo5,-50,1000); HAL_Delay(1000);
+    // GotoAngleInMs(&servo1, 80,2000); GotoAngleInMs(&servo2, 60,2000); GotoAngleInMs(&servo5, 50,2000); HAL_Delay(2000);
+    // GotoAngleInMs(&servo1,  0,1000); GotoAngleInMs(&servo2,  0,1000); GotoAngleInMs(&servo5,  0,1000); HAL_Delay(1000);
  
-    GotoAngleInMs(&servo2,-80,2000); HAL_Delay(2000);
-    GotoAngleInMs(&servo2, 80,4000); HAL_Delay(4000);
-    GotoAngleInMs(&servo2,  0,2000); HAL_Delay(2000);
-    GotoAngleInMs(&servo2,-80,2000); HAL_Delay(2000);
-    GotoAngleInMs(&servo2, 80,4000); HAL_Delay(4000);
-    GotoAngleInMs(&servo2,  0,2000); HAL_Delay(2000);
+    // GotoAngleInMs(&servo2,-80,2000); HAL_Delay(2000);
+    // GotoAngleInMs(&servo2, 80,4000); HAL_Delay(4000);
+    // GotoAngleInMs(&servo2,  0,2000); HAL_Delay(2000);
+    // GotoAngleInMs(&servo2,-80,2000); HAL_Delay(2000);
+    // GotoAngleInMs(&servo2, 80,4000); HAL_Delay(4000);
+    // GotoAngleInMs(&servo2,  0,2000); HAL_Delay(2000);
  
   }
 }

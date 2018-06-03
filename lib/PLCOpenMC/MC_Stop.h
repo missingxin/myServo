@@ -1,8 +1,8 @@
 /*******************************************************************************
 * File Name          : MC_Stop.h
 * Author             : Joseph Lin
-* Version            : V0.0.1
-* Date               : 05/11/2018
+* Version            : V0.0.2
+* Date               : 06/3/2018
 * Description        : MC_Stop FB
 ********************************************************************************
 * 說明：MC_Stop FB
@@ -13,12 +13,14 @@
 #include "PLCOpen.h"
 /* Private typedef -----------------------------------------------------------*/
 
-
-typedef struct MC_Stop_T MC_Stop_T;
 void MC_Stop_updater(void *obj);
-struct MC_Stop_T{
+typedef struct{
   void (*updater)(void* obj);
-  AXIS_REF *Axis;             //I/O B axis
+  void ***inList;
+  void **outList;
+  unsigned char inNumber;
+  unsigned char outNumber;
+  AXIS_t *Axis;             //I/O B axis
   BOOL *Execute;              //IN  B Start the motion at rising edge
   REAL *Deceleration;         //IN  E Value of the ‘Deceleration’ [u/s2]
   REAL *Jerk;                 //IN  E Value of the ‘Jerk’ [u/s3]
@@ -28,7 +30,8 @@ struct MC_Stop_T{
   BOOL Error;                 //OUT E Signals that an error has occurred within the Function Block
   WORD ErrorID;               //OUT E Error identification
   BOOL prevExecute;           //Internal use, to cache previous Execute value, so we can capture the rising edge.
-};
-
-
+}MC_Stop_t;
+void FB_ADD_MC_STOP_PAGE(
+  FUNCTION_BLOCK_PAGE_t ** fpool,
+  unsigned char *fpoolCount);
 #endif //__MC_STOP_H__

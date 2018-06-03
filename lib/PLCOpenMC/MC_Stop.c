@@ -1,8 +1,8 @@
 /*******************************************************************************
 * File Name          : MC_Stop.c
 * Author             : Joseph Lin
-* Version            : V0.0.1
-* Date               : 05/11/2018
+* Version            : V0.0.2
+* Date               : 06/3/2018
 * Description        : MC_Stop FB
 ********************************************************************************
 * 說明：MC_Stop FB
@@ -11,22 +11,9 @@
 #include "MC_Stop.h"
 // ############################### Object Way ###############################
 
-//######### 需要額外實作的功能 ####################
-//呼叫一個可以持續被呼叫的函式，
-//目的：當doing為0時表示為一個新的hoem指令
-//             TRUE時表示是一個正在跑的指令，需要查詢它的狀態
-//回傳0時表示完成且無錯誤
-//回傳1時表示進行中
-//回傳2時表示有錯誤且已停止
-extern unsigned char DEV_Stop(
-  AXIS_REF * axis, 
-  BOOL doing,
-  REAL acceleration,
-  REAL jerk
-);
 
 void MC_Stop_updater(void *iobj){
-  MC_Stop_T* obj = (MC_Stop_T*) iobj;
+  MC_Stop_t* obj = (MC_Stop_t*) iobj;
   if(obj->Axis->power == FALSE){
     //斷電，放棄所有動作而且指出CommandAborted
       obj->Done = FALSE;
@@ -46,7 +33,7 @@ void MC_Stop_updater(void *iobj){
     obj->Axis->CurrentFB = (void *)obj;
     obj->Busy = FALSE; //保持FALSE來讓DEV_func判斷是否為第一次進入
     obj->Axis->setStat(obj->Axis,FA_STOPPING);
-    unsigned char res = DEV_Stop(obj->Axis, obj->Busy, *(obj->Deceleration), *(obj->Jerk));
+    unsigned char res = obj->Axis->callStop(obj->Axis, obj->Busy, *(obj->Deceleration), *(obj->Jerk));
     switch (res){
       case(0):{
         //完成
@@ -84,6 +71,40 @@ void MC_Stop_updater(void *iobj){
   obj->prevExecute = *(obj->Execute);
 }
 
-
+void FB_ADD_MC_STOP_PAGE(
+  FUNCTION_BLOCK_PAGE_t ** fpool,
+  unsigned char *fpoolCount)
+{
+  MC_Stop_t *fbobj =  malloc(sizeof(MC_Stop_t));
+  *fbobj = (MC_Stop_t){MC_Home_updater, 
+  malloc(sizeof(void ***)*4),  //C inList
+  malloc(sizeof(void **)*6),   //C outList
+  4, //C  inNumber
+  6, //C  outNumber
+  0, //IO axis 
+  0, //I  Execute
+  0, //I  Deceleration
+  0, //I  Jerk
+  0, //O  Done
+  0, //O  Busy
+  0, //O  CommandAborted
+  0, //O  Error
+  0, //O  ErrorID
+  0  //C  prevEnable, internel use
+  };
+  ((*fbobj).inList)[0] = (void **)&(fbobj->Axis);
+  ((*fbobj).inList)[1] = (void **)&(fbobj->Execute);
+  ((*fbobj).inList)[2] = (void **)&(fbobj->Deceleration);
+  ((*fbobj).inList)[3] = (void **)&(fbobj->Jerk);
+  ((*fbobj).outList)[0] = (fbobj->Axis);
+  ((*fbobj).outList)[1] = &(fbobj->Done);
+  ((*fbobj).outList)[2] = &(fbobj->Busy);
+  ((*fbobj).outList)[3] = &(fbobj->CommandAborted);
+  ((*fbobj).outList)[4] = &(fbobj->Error);
+  ((*fbobj).outList)[5] = &(fbobj->ErrorID);
+  FUNCTION_BLOCK_PAGE_t* newPage = createPage((FUNCTION_BLOCK_t*)fbobj,bt_MC_Stop);
+  *(fpool+*fpoolCount) = newPage;
+  *fpoolCount = *fpoolCount +1;
+}
 
 

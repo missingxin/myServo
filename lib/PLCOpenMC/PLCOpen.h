@@ -1,8 +1,8 @@
 /*******************************************************************************
 * File Name          : PLCOpen.h
 * Author             : Joseph Lin
-* Version            : V0.0.1
-* Date               : 05/15/2018
+* Version            : V0.0.2
+* Date               : 06/3/2018
 * Description        : 建立可物件化的PLCOpen Middleware
 ********************************************************************************
 * 說明：主要目標是建立一個可重覆使用在不同平台的 PLCOpen Middleware
@@ -10,32 +10,10 @@
 /* Includes ------------------------------------------------------------------*/
 #ifndef __PLCOPEN_MC_H__
 #define __PLCOPEN_MC_H__
+#include "PLCLogic.h"
+#include "Axis.h"
+
 /* Private typedef -----------------------------------------------------------*/
-#if !defined(BOOL)
-#define BOOL unsigned char
-#endif
-
-#if !defined(FALSE)
-#define FALSE 0
-#endif
-
-#if !defined(TRUE)
-#define TRUE 1
-#endif
-
-#if !defined(REAL)
-#define REAL float
-#endif
-
-
-//輸入FB, 接受外部值, 更新時bypass, REAL, 因目前只會在這裡使用，所以做在這裡
-typedef struct INPUT_SOURCE_REAL_T INPUT_SOURCE_REAL_T;
-struct INPUT_SOURCE_REAL_T{
-  void (*updater)(void* obj);
-  void (*assign)(void* obj, REAL val);
-  REAL IN;
-  REAL OUT;
-};
 
 typedef enum{
   undefine, //0
@@ -47,57 +25,32 @@ typedef enum{
   WORD_UNDEFINED
 }WORD;
 
-typedef enum{
-  mcPositiveDirection,
-  mcShortestWay,
-  mcNegativeDirection,
-  mcCurrentDirection
-}MC_DIRECTION;
-typedef enum {
-  FA_DISABLED,  //0
-  FA_STANDSTILL,
-  FA_HOMING,
-  FA_STOPPING,
-  FA_DISCRETEMOTION,
-  FA_CONTINUOUSMOTION,
-  FA_SYNCHRONIZEDMOTION,
-  FA_ERRORSTOP
-}FA_STAT_NUM;
 
+void INPUT_REAL_assignor(void* obj, REAL val);
+void INPUT_REAL_updater(void* obj);
+void setInputReal(FUNCTION_BLOCK_PAGE_t ** inputPool, unsigned char idx, REAL val);
 
-typedef union{
-  BOOL FA[8];
-  struct {
-    BOOL FA_DISABLED;
-    BOOL FA_STANDSTILL;
-    BOOL FA_HOMING;
-    BOOL FA_STOPPING;
-    BOOL FA_DISCRETEMOTION;
-    BOOL FA_CONTINUOUSMOTION;
-    BOOL FA_SYNCHRONIZEDMOTION;
-    BOOL FA_ERRORSTOP;
-  };
-}FA_STAT;
+void FB_ADD_INPUT_REAL_PAGE(
+  FUNCTION_BLOCK_PAGE_t ** fpool,
+  unsigned char *fpoolCount,
+  FUNCTION_BLOCK_PAGE_t ** ipool,
+  unsigned char *ipoolCount);
 
-
-typedef struct AXIS_REF AXIS_REF;
-struct AXIS_REF{
-  FA_STAT stat;     // FA_Disabled;
-  BOOL    power;    // FALSE;
-  BOOL    positive; // FALSE;
-  BOOL    negative; // FALSE;
-  void *  DEVICE;
-  void *  CurrentFB;
-  void (*setStat)(AXIS_REF *axis, FA_STAT_NUM stat);
-};
-
-void INPUT_SOURCE_REAL_assign(void* obj, REAL val);
-void INPUT_SOURCE_REAL_updater(void* obj);
-void setStat(AXIS_REF *axis, FA_STAT_NUM stat);
+void FB_ADD_OUTPUT_REAL_PAGE(
+  FUNCTION_BLOCK_PAGE_t ** fpool,
+  unsigned char *fpoolCount,
+  FUNCTION_BLOCK_PAGE_t ** opool,
+  unsigned char *opoolCount);
 
 
 
 
+
+#include "MC_Power.h"
+#include "MC_Home.h"
+#include "MC_Stop.h"
+#include "MC_Halt.h"
+#include "MC_MoveAbsolute.h"
 
 // ############################### Object Way ###############################
 
@@ -117,7 +70,7 @@ void setStat(AXIS_REF *axis, FA_STAT_NUM stat);
 /**3.1**************************************************************************
 * Function Name  : MC_Power
 * Description    : This Function Block controls the power stage (On or Off).
-* In and Out     : @AXIS_REF Axis         //B Axis
+* In and Out     : @AXIS_t Axis         //B Axis
 * Input          : @BOOL Enable,          //B As long as ‘Enable’ is true, power is being enabled.
 *                  @BOOL EnablePositive,  //E As long as ‘Enable’ is true, this permits motion in positive direction
 *                  @BOOL EnableNegative   //E As long as ‘Enable’ is true, this permits motion in negative direction
@@ -139,7 +92,7 @@ void setStat(AXIS_REF *axis, FA_STAT_NUM stat);
 /*
 void MC_Power(
   //VAR_IN_OUT
-    AXIS_REF Axis,
+    AXIS_t Axis,
   //VAR_OUTPUT
     BOOL *Status,          //B Effective state of the power stage
     BOOL *Valid,           //E If true, a valid set of outputs is available at the FB
@@ -264,7 +217,7 @@ struct multiAxisinfo
 //  MC_Home is a generic FB which does a system specified homing procedure which can be constructed by the StepHoming FBs as specified in Part 5 – Homing Procedures.
 void MC_Home(   
   //VAR_IN_OUT
-    AXIS_REF Axis,
+    AXIS_t Axis,
   //VAR_OUTPUT
     BOOL Done,            //B Reference known and set sucessfully
     BOOL Busy,            //E The FB is not finished and new output values are to be expected

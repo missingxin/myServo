@@ -1,8 +1,8 @@
 /*******************************************************************************
 * File Name          : MC_Power.h
 * Author             : Joseph Lin
-* Version            : V0.0.1
-* Date               : 05/11/2018
+* Version            : V0.0.2
+* Date               : 06/3/2018
 * Description        : MC_Power FB
 ********************************************************************************
 * 說明：MC_Power FB
@@ -13,11 +13,14 @@
 #include "PLCOpen.h"
 /* Private typedef -----------------------------------------------------------*/
 
-typedef struct MC_Power_T MC_Power_T;
 void MC_Power_updater(void *obj);
-struct MC_Power_T{
+typedef struct {
   void (*updater)(void* obj);
-  AXIS_REF *Axis;        //I/O B axis
+  void ***inList;
+  void **outList;
+  unsigned char inNumber;
+  unsigned char outNumber;
+  AXIS_t *Axis;        //I/O B axis
   BOOL *Enable;          //IN  B As long as ‘Enable’ is true, power is being enabled.
   BOOL *EnablePositive;  //IN  E As long as ‘Enable’ is true, this permits motion in positive direction
   BOOL *EnableNegative;   //IN  E As long as ‘Enable’ is true, this permits motion in negative direction
@@ -26,7 +29,8 @@ struct MC_Power_T{
   BOOL Error;            //OUT B Signals that an error has occurred within the Function Block
   WORD ErrorID;          //OUT E Error identification
   BOOL prevEnable;
-};
-
-
+}MC_Power_t;
+void FB_ADD_MC_POWER_PAGE(
+  FUNCTION_BLOCK_PAGE_t ** fpool,
+  unsigned char *fpoolCount);
 #endif //__MC_POWER_H__

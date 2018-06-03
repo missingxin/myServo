@@ -1,8 +1,8 @@
 /*******************************************************************************
 * File Name          : MC_Home.h
 * Author             : Joseph Lin
-* Version            : V0.0.1
-* Date               : 05/11/2018
+* Version            : V0.0.2
+* Date               : 06/3/2018
 * Description        : MC_Home FB
 ********************************************************************************
 * 說明：MC_Home FB
@@ -13,12 +13,14 @@
 #include "PLCOpen.h"
 /* Private typedef -----------------------------------------------------------*/
 
-
-typedef struct MC_Home_T MC_Home_T;
 void MC_Home_updater(void *obj);
-struct MC_Home_T{
+typedef struct{
   void (*updater)(void* obj);
-  AXIS_REF *Axis;             //I/O B axis
+  void ***inList;
+  void **outList;
+  unsigned char inNumber;
+  unsigned char outNumber;
+  AXIS_t *Axis;             //I/O B axis
   BOOL *Execute;              //IN  B Start the motion at rising edge
   REAL *Position;             //IN  E Defines the chronological sequence of the FB. See 2.4.2 Aborting versus Buffered modes
   MC_BUFFER_MODE *BufferMode;  //IN  E As long as ‘Enable’ is true, this permits motion in negative direction
@@ -29,7 +31,8 @@ struct MC_Home_T{
   BOOL Error;                 //OUT E Signals that an error has occurred within the Function Block
   WORD ErrorID;               //OUT E Error identification
   BOOL prevExecute;           //Internal use, to cache previous Execute value, so we can capture the rising edge.
-};
-
-
+}MC_Home_t;
+void FB_ADD_MC_HOME_PAGE(
+  FUNCTION_BLOCK_PAGE_t ** fpool,
+  unsigned char *fpoolCount);
 #endif //__MC_HOME_H__

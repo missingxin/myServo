@@ -1,8 +1,8 @@
 /*******************************************************************************
 * File Name          : MC_Halt.c
 * Author             : Joseph Lin
-* Version            : V0.0.1
-* Date               : 05/12/2018
+* Version            : V0.0.2
+* Date               : 06/3/2018
 * Description        : MC_Halt FB
 ********************************************************************************
 * 說明：MC_Halt FB
@@ -11,26 +11,9 @@
 #include "MC_Halt.h"
 // ############################### Object Way ###############################
 
-//######### 需要額外實作的功能 ####################
-//呼叫一個可以持續被呼叫的函式，
-//目的：當doing為0時表示為一個新的hoem指令
-//             TRUE時表示是一個正在跑的指令，需要查詢它的狀態
-//回傳0時表示完成且無錯誤
-//回傳1時表示進行中
-//回傳2時表示有錯誤且已停止
-extern unsigned char DEV_Halt(
-  AXIS_REF * axis, 
-  BOOL doing,
-  REAL accelerateion,
-  REAL jerk
-);
-
-
-
-
 //######### 輸入輸出及狀態管理器 ####################
 void MC_Halt_updater(void *iobj){
-  MC_Halt_T* obj = (MC_Halt_T*) iobj;
+  MC_Halt_t* obj = (MC_Halt_t*) iobj;
   if(obj->Axis->power == FALSE){
       //忽然停電
       obj->Done = FALSE;
@@ -58,7 +41,7 @@ void MC_Halt_updater(void *iobj){
 
 
   if (obj->Active){
-    unsigned char res = DEV_Halt(obj->Axis, obj->Busy, *(obj->Deceleration),*(obj->Jerk)  );
+    unsigned char res = obj->Axis->callHalt(obj->Axis, obj->Busy, *(obj->Deceleration),*(obj->Jerk)  );
     switch (res){
       case(0):{
         //完成
@@ -102,3 +85,42 @@ void MC_Halt_updater(void *iobj){
   }
 }
 
+void FB_ADD_MC_HALT_PAGE(
+  FUNCTION_BLOCK_PAGE_t ** fpool,
+  unsigned char *fpoolCount)
+{
+  MC_Halt_t *fbobj =  malloc(sizeof(MC_Halt_t));
+  *fbobj = (MC_Halt_t){MC_Home_updater, 
+  malloc(sizeof(void ***)*5),  //C inList
+  malloc(sizeof(void **)*7),   //C outList
+  5, //C  inNumber
+  7, //C  outNumber
+  0, //IO axis 
+  0, //I  Execute
+  0, //I  Deceleration
+  0, //I  Jerk
+  0, //I  BufferMode
+  0, //O  Done
+  0, //O  Busy
+  0, //O  Active
+  0, //O  CommandAborted
+  0, //O  Error
+  0, //O  ErrorID
+  0  //C  prevEnable, internel use
+  };
+  ((*fbobj).inList)[0] = (void **)&(fbobj->Axis);
+  ((*fbobj).inList)[1] = (void **)&(fbobj->Execute);
+  ((*fbobj).inList)[2] = (void **)&(fbobj->Deceleration);
+  ((*fbobj).inList)[3] = (void **)&(fbobj->Jerk);
+  ((*fbobj).inList)[4] = (void **)&(fbobj->BufferMode);
+  ((*fbobj).outList)[0] = (fbobj->Axis);
+  ((*fbobj).outList)[1] = &(fbobj->Done);
+  ((*fbobj).outList)[2] = &(fbobj->Busy);
+  ((*fbobj).outList)[3] = &(fbobj->Active);
+  ((*fbobj).outList)[4] = &(fbobj->CommandAborted);
+  ((*fbobj).outList)[5] = &(fbobj->Error);
+  ((*fbobj).outList)[6] = &(fbobj->ErrorID);
+  FUNCTION_BLOCK_PAGE_t* newPage = createPage((FUNCTION_BLOCK_t*)fbobj,bt_MC_Halt);
+  *(fpool+*fpoolCount) = newPage;
+  *fpoolCount = *fpoolCount +1;
+}
