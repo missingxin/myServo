@@ -38,8 +38,7 @@ void MC_Halt_updater(void *iobj){
     obj->Busy = FALSE; //保持FALSE來讓DEV_func判斷是否為第一次進入
   }
   obj->prevExecute = *(obj->Execute);
-
-
+  
   if (obj->Active){
     unsigned char res = obj->Axis->callHalt(obj->Axis, obj->Busy, *(obj->Deceleration),*(obj->Jerk)  );
     switch (res){
@@ -89,8 +88,9 @@ void FB_ADD_MC_HALT_PAGE(
   FUNCTION_BLOCK_PAGE_t ** fpool,
   unsigned char *fpoolCount)
 {
+  printf("FB_ADD_MC_HALT_PAGE\r\n");
   MC_Halt_t *fbobj =  malloc(sizeof(MC_Halt_t));
-  *fbobj = (MC_Halt_t){MC_Home_updater, 
+  *fbobj = (MC_Halt_t){MC_Halt_updater, 
   malloc(sizeof(void ***)*5),  //C inList
   malloc(sizeof(void **)*7),   //C outList
   5, //C  inNumber

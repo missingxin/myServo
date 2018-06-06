@@ -16,7 +16,7 @@
 
 
 //######### 輸入輸出及狀態管理器 ####################
-void MC_Home_updater(void *iobj){
+void MC_MoveAbs_updater(void *iobj){
   MC_MoveAbsolute_t* obj = (MC_MoveAbsolute_t*) iobj;
   if(obj->Axis->power == FALSE){
       //忽然停電
@@ -38,25 +38,23 @@ void MC_Home_updater(void *iobj){
     obj->prevExecute = *(obj->Execute);
     obj->Done = FALSE;
     obj->Axis->CurrentFB = (void *)obj; obj->Active = 1;
-    obj->Busy = FALSE; //保持FALSE來讓DEV_func判斷是否為第一次進入
+    obj->Busy = FALSE; //保持FALSE來讓device判斷是否為第一次進入
   }
   obj->prevExecute = *(obj->Execute);
 
-
   if (obj->Active){
     unsigned char res = obj->Axis->callMoveAbs(
-      obj->Axis, 
-      obj->Busy, 
-      *(obj->ContinuousUpdate),
-      *(obj->Position),
-      *(obj->Velocity),
-      *(obj->Acceleration),
-      *(obj->Deceleration),
-      *(obj->Jerk),
-      *(obj->Direction)
-    );
+        obj->Axis,
+        obj->Busy,
+        *(obj->ContinuousUpdate),
+        *(obj->Position),
+        *(obj->Velocity),
+        *(obj->Acceleration),
+        *(obj->Deceleration),
+        *(obj->Jerk),
+        *(obj->Direction));
     switch (res){
-      case(0):{
+      case(PowerControl_Done):{
         //完成
         obj->Done = TRUE;
         obj->Busy = FALSE;
@@ -66,7 +64,7 @@ void MC_Home_updater(void *iobj){
         obj->ErrorID = WORD_NO_ERROR;
         break;
       }
-      case(1):{
+      case(PowerControl_Doing):{
         //進行中
         obj->Done = FALSE;
         obj->Busy = TRUE;
@@ -75,7 +73,7 @@ void MC_Home_updater(void *iobj){
         obj->ErrorID = WORD_NO_ERROR;
         break;
       }
-      case(2):{
+      case(PowerControl_Error):{
         //錯誤
         obj->Done = FALSE;
         obj->Busy = FALSE;
@@ -103,8 +101,9 @@ void FB_ADD_MC_MOVEABSOLUTE_PAGE(
   FUNCTION_BLOCK_PAGE_t ** fpool,
   unsigned char *fpoolCount)
 {
+  printf("FB_ADD_MC_MOVEABSOLUTE_PAGE\r\n");
   MC_MoveAbsolute_t *fbobj =  malloc(sizeof(MC_MoveAbsolute_t));
-  *fbobj = (MC_MoveAbsolute_t){MC_Home_updater, 
+  *fbobj = (MC_MoveAbsolute_t){MC_MoveAbs_updater, 
   malloc(sizeof(void ***)*10),  //C inList
   malloc(sizeof(void **)*7),   //C outList
   10, //C  inNumber

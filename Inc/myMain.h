@@ -16,11 +16,12 @@
 #ifndef __MYMAIN_H__
 #define __MYMAIN_H__
 /* Private typedef -----------------------------------------------------------*/
+#define PWM_Period 60000
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
 void myMain();
-void servoUpdate();
+void device_init();
 /* Private functions ---------------------------------------------------------*/
 #endif

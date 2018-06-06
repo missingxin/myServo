@@ -27,8 +27,7 @@ void MC_Home_updater(void *iobj){
       obj->prevExecute = *(obj->Execute);
       return;
   }
-  
-  obj->Active = obj->Axis->CurrentFB == (void *)obj;
+  obj->Active = (obj->Axis->CurrentFB == (void *)iobj);
   if( obj->Axis->stat.FA_STANDSTILL &&
       obj->prevExecute == FALSE &&
       *(obj->Execute) == TRUE
@@ -36,11 +35,11 @@ void MC_Home_updater(void *iobj){
     //開始跑FB
     obj->prevExecute = *(obj->Execute);
     obj->Done = FALSE;
-    obj->Axis->CurrentFB = (void *)obj; obj->Active = 1;
+    obj->Axis->CurrentFB = (void *)iobj;
+    obj->Active = 1;
     obj->Busy = FALSE; //保持FALSE來讓DEV_func判斷是否為第一次進入
   }
   obj->prevExecute = *(obj->Execute);
-
 
   if (obj->Active){
     unsigned char res = obj->Axis->callHome(obj->Axis, obj->Busy, *(obj->Position));
@@ -92,6 +91,7 @@ void FB_ADD_MC_HOME_PAGE(
   FUNCTION_BLOCK_PAGE_t ** fpool,
   unsigned char *fpoolCount)
 {
+  printf("FB_ADD_MC_HOME_PAGE\r\n");
   MC_Home_t *fbobj =  malloc(sizeof(MC_Home_t));
   *fbobj = (MC_Home_t){MC_Home_updater, 
   malloc(sizeof(void ***)*4),  //C inList
@@ -109,7 +109,7 @@ void FB_ADD_MC_HOME_PAGE(
   0, //O  Error
   0, //O  ErrorID
   0  //C  prevEnable, internel use
-  };
+  };;
   ((*fbobj).inList)[0] = (void **)&(fbobj->Axis);
   ((*fbobj).inList)[1] = (void **)&(fbobj->Execute);
   ((*fbobj).inList)[2] = (void **)&(fbobj->Position);
@@ -121,6 +121,7 @@ void FB_ADD_MC_HOME_PAGE(
   ((*fbobj).outList)[4] = &(fbobj->CommandAborted);
   ((*fbobj).outList)[5] = &(fbobj->Error);
   ((*fbobj).outList)[6] = &(fbobj->ErrorID);
+  
   FUNCTION_BLOCK_PAGE_t* newPage = createPage((FUNCTION_BLOCK_t*)fbobj,bt_MC_Home);
   *(fpool+*fpoolCount) = newPage;
   *fpoolCount = *fpoolCount +1;

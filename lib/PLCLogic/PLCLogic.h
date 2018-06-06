@@ -85,7 +85,14 @@ typedef struct {
   char inLinkTableLength;
 }FUNCTION_BLOCK_PAGE_t;
 
-
+typedef struct {
+  FUNCTION_BLOCK_PAGE_t** ipool;
+  FUNCTION_BLOCK_PAGE_t** fbpool;
+  FUNCTION_BLOCK_PAGE_t** opool;
+  unsigned char ipoolCnt;
+  unsigned char fbpoolCnt;
+  unsigned char opoolCnt;
+}FUNCTION_BLOCK_POOL_t;
 
 //輸入FB, 接受外部值, 更新時bypass, BOOL
 typedef struct {
@@ -184,6 +191,7 @@ void FB_ADD_NOT_PAGE(
 // void FB_ADD_XNOR_PAGE( FUNCTION_BLOCK_PAGE_t ** fpool, unsigned char *fpoolCount);
 
 void setLinkTable(FUNCTION_BLOCK_PAGE_t ** pool, unsigned char targetFBID, FB_INPUT_LINK_t* linkTable, unsigned char linkTableLength);
+FUNCTION_BLOCK_POOL_t* setLinkTable2(unsigned char *rule);
 void linkLinkTable(FUNCTION_BLOCK_PAGE_t ** pool, unsigned char poolSize);
 void updateFBS(FUNCTION_BLOCK_PAGE_t ** pool, unsigned char poolSize);
 void setInputBool(FUNCTION_BLOCK_PAGE_t ** inputPool, unsigned char idx, BOOL val);
@@ -193,6 +201,7 @@ void dump_UPDATER();
 
 void dump_INPUT(FUNCTION_BLOCK_PAGE_t ** fpool, unsigned char count);
 void dump_OUTPUT(FUNCTION_BLOCK_PAGE_t ** fpool, unsigned char count);
+void dump_IO(FUNCTION_BLOCK_PAGE_t ** ipool, unsigned char icount, FUNCTION_BLOCK_PAGE_t ** opool, unsigned char ocount);
 FUNCTION_BLOCK_PAGE_t * createPage(FUNCTION_BLOCK_t* fbobj,Block_Type_t type);
 
 void _FB_ADD_IIO_PAGE( 

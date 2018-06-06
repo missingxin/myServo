@@ -9,6 +9,7 @@
 *******************************************************************************/
 /* Includes ------------------------------------------------------------------*/
 #include "PLCLogic.h"
+#include "PLCOpen.h"
 // ############################### Object Way ###############################
 
 
@@ -90,6 +91,31 @@ void LOGIC_XNOR_updater(void *iobj)
                (obj->IN2 != 0 && *(obj->IN2) == TRUE));
 }
 
+//######### 按登記表將連結實際連接 ####################
+void linkLinkTable(FUNCTION_BLOCK_PAGE_t ** pool, unsigned char poolSize)
+{
+  int fbid;
+  for(fbid=0;fbid<poolSize;fbid++){
+    FUNCTION_BLOCK_PAGE_t **thisPage = &(*(pool + fbid));
+    int linkid;
+    int cnt = (**thisPage).inLinkTableLength;
+    for(linkid=0;linkid<cnt;linkid++){
+      FB_INPUT_LINK_t *thisLink = ((**thisPage).inLinkTable + linkid);
+      unsigned char ourIn    = thisLink->ourInPinIDX;
+      unsigned char theirFB  = thisLink->theirFBIDX;
+      unsigned char theirOut = thisLink->theirOutPinIDX;
+      FUNCTION_BLOCK_PAGE_t **thatPage = &(*(pool + theirFB));
+      printf("linking %d %d %d %d\r\n", fbid, ourIn, theirFB, theirOut);
+      *((**thisPage).obj->inList[ourIn]) = (**thatPage).obj->outList[theirOut];
+      printf("0x%lx, ", (unsigned long)&((**thisPage).obj->inList[ourIn]));
+      printf("0x%lx, ", (unsigned long) ((**thisPage).obj->inList[ourIn]));
+      printf("0x%lx, ", (unsigned long)*((**thisPage).obj->inList[ourIn]));
+      printf("0x%lx, ", (unsigned long)&((**thatPage).obj->outList[theirOut]));
+      printf("0x%lx,\r\n", (unsigned long)((**thatPage).obj->outList[theirOut]));
+    }
+  }
+}
+
 //######### 登記FB之間連結的狀態到登記表中 ####################
 void setLinkTable(
   FUNCTION_BLOCK_PAGE_t ** pool,
@@ -108,33 +134,160 @@ void setLinkTable(
 
 //######### 登記FB之間連結的狀態到登記表中 ####################
 // todo:改為吃byte array
-void setLinkTable2(FUNCTION_BLOCK_PAGE_t ** pool, unsigned char targetFBID, FB_INPUT_LINK_t* linkTable, unsigned char linkTableLength)
-{
-  fbPage(pool,targetFBID).inLinkTableLength = linkTableLength;
-  if (linkTableLength ==0){
-    fbPage(pool,targetFBID).inLinkTable = (void*)0;
-  }else{
-    fbPage(pool,targetFBID).inLinkTable = malloc(sizeof(FB_INPUT_LINK_t)*linkTableLength);
-    memcpy(fbPage(pool,targetFBID).inLinkTable,linkTable,sizeof(FB_INPUT_LINK_t)*linkTableLength);
-  }
-}
+FUNCTION_BLOCK_POOL_t* setLinkTable2(unsigned char *rule){
+  //1.準備好容器
+  printf("Create pools . v2\r\n");
+  FUNCTION_BLOCK_POOL_t* pool;
+  pool = malloc(sizeof(FUNCTION_BLOCK_POOL_t));
+  (*pool).ipoolCnt = *(rule+0);
+  (*pool).fbpoolCnt = *(rule + 0) + *(rule + 1) + *(rule + 2);
+  (*pool).opoolCnt = *(rule+2);
+  (*pool).ipool = malloc(sizeof(FUNCTION_BLOCK_PAGE_t) * pool->ipoolCnt);
+  (*pool).fbpool = malloc(sizeof(FUNCTION_BLOCK_PAGE_t) * pool->fbpoolCnt);
+  (*pool).opool = malloc(sizeof(FUNCTION_BLOCK_PAGE_t) * pool->opoolCnt);
 
-//######### 按登記表將連結實際連接 ####################
-void linkLinkTable(FUNCTION_BLOCK_PAGE_t ** pool, unsigned char poolSize)
-{
-  int fbid;
-  for(fbid=0;fbid<poolSize;fbid++){
-    int linkid;
-    int cnt = fbPagePtr(pool,fbid)->inLinkTableLength;
-    for(linkid=0;linkid<cnt;linkid++){
-      FB_INPUT_LINK_t* thisLink = (fbPagePtr(pool,fbid)->inLinkTable + linkid);
-      unsigned char ourIn    = thisLink->ourInPinIDX;
-      unsigned char theirFB  = thisLink->theirFBIDX;
-      unsigned char theirOut = thisLink->theirOutPinIDX;
-      *(fbPagePtr(pool,fbid)->obj->inList[ourIn]) = fbPagePtr(pool,theirFB)->obj->outList[theirOut];
+  //2.建立所有對應FB
+  printf("Create FBs . v2\r\n");
+  unsigned int cnt;
+  unsigned char FBP_cnt = 0;
+  unsigned char INPUT_cnt = 0;
+  unsigned char OUTPUT_cnt = 0;
+  unsigned int offset = 3;
+  for (cnt = 0; cnt < pool->fbpoolCnt; cnt++)
+  {
+    switch(rule[offset]){
+      case(bt_Input_Bool):{
+        FB_ADD_INPUT_BOOL_PAGE(pool->fbpool,&FBP_cnt,pool->ipool,&INPUT_cnt);
+        break;
+      }
+      case(bt_Output_Bool):{
+        FB_ADD_OUTPUT_BOOL_PAGE(pool->fbpool,&FBP_cnt,pool->opool,&OUTPUT_cnt);
+        break;
+      }
+      case(bt_Logic_Not):{
+        FB_ADD_NOT_PAGE(pool->fbpool,&FBP_cnt);
+        break;
+      }
+      case(bt_Logic_And):{
+        FB_ADD_AND_PAGE(pool->fbpool,&FBP_cnt);
+        break;
+      }
+      case(bt_Logic_Or):{
+        FB_ADD_OR_PAGE(pool->fbpool,&FBP_cnt);
+        break;
+      }
+      case(bt_Logic_Nand):{
+        FB_ADD_NAND_PAGE(pool->fbpool,&FBP_cnt);
+        break;
+      }
+      case(bt_Logic_Nor):{
+        FB_ADD_NOR_PAGE(pool->fbpool,&FBP_cnt);
+        break;
+      }
+      case(bt_Logic_Xor):{
+        FB_ADD_XOR_PAGE(pool->fbpool,&FBP_cnt);
+        break;
+      }
+      case(bt_Logic_Xnor):{
+        FB_ADD_XNOR_PAGE(pool->fbpool,&FBP_cnt);
+        break;
+      }
+      case(bt_Input_Real):{
+        FB_ADD_INPUT_REAL_PAGE(pool->fbpool,&FBP_cnt,pool->ipool,&INPUT_cnt); 
+        break;
+      }
+      case(bt_Output_Real):{
+        FB_ADD_OUTPUT_REAL_PAGE(pool->fbpool,&FBP_cnt,pool->opool,&OUTPUT_cnt);
+        break;
+      }
+      case(bt_Input_Axis):{
+        FB_ADD_AXIS_PAGE(pool->fbpool,&FBP_cnt);
+        break;
+      }
+      case(bt_MC_Power):{
+        FB_ADD_MC_POWER_PAGE(pool->fbpool,&FBP_cnt);
+        break;
+      }
+      case(bt_MC_Home):{
+        FB_ADD_MC_HOME_PAGE(pool->fbpool,&FBP_cnt);
+        break;
+      }
+      case(bt_MC_Stop):{
+        FB_ADD_MC_STOP_PAGE(pool->fbpool,&FBP_cnt);
+        break;
+      }
+      case(bt_MC_Halt):{
+        FB_ADD_MC_HALT_PAGE(pool->fbpool,&FBP_cnt);
+        break;
+      }
+      case(bt_MC_MoveAbsolute):{
+        FB_ADD_MC_MOVEABSOLUTE_PAGE(pool->fbpool,&FBP_cnt);
+        break;
+      }
+    }
+    offset = offset + 2 + rule[offset+1]*3;
+  }
+  
+  //3.建立連結表
+  printf("Create LinkTable . v2\r\n");
+  offset = 3;
+  for (cnt = 0; cnt < pool->fbpoolCnt; cnt++)
+  {
+    unsigned char linkTableLength = rule[offset + 1];
+    fbPage(pool->fbpool, cnt).inLinkTableLength = linkTableLength;
+    if (linkTableLength == 0)
+    {
+      fbPage(pool->fbpool, cnt).inLinkTable = (void *)0;
+    }
+    else
+    {
+      fbPage(pool->fbpool, cnt).inLinkTable = malloc(sizeof(FB_INPUT_LINK_t) * linkTableLength);
+      memcpy(fbPage(pool->fbpool, cnt).inLinkTable, (FB_INPUT_LINK_t *)&(rule[offset + 2]), sizeof(FB_INPUT_LINK_t) * linkTableLength);
+      int i;
+      printf(" FB(%d) : ", cnt);
+      for (i = 0; i < linkTableLength; i++)
+      {
+        printf("{ %d, %d, %d } , ",
+               fbPage(pool->fbpool, cnt).inLinkTable[i].ourInPinIDX,
+               fbPage(pool->fbpool, cnt).inLinkTable[i].theirFBIDX,
+               fbPage(pool->fbpool, cnt).inLinkTable[i].theirOutPinIDX);
+      }
+      printf("(cnt = %d)\r\n", linkTableLength);
+    }
+    offset = offset + 2 + rule[offset+1]*3;
+
+    if (cnt == 3)
+    {
+      printf("FB(3).obj.outlist(1) = %lx\r\n",
+             (unsigned long)fbPage(pool->fbpool, cnt).obj->outList[1]);
+      printf("FB(3).obj.outlist(2) = %lx\r\n",
+             (unsigned long)fbPage(pool->fbpool, cnt).obj->outList[2]);
+    }
+    if (cnt == 4)
+    {
+      printf("FB(4).obj.inlist(0) = %lx , %lx\r\n",
+             (unsigned long)fbPage(pool->fbpool, cnt).obj->inList[0],
+             (unsigned long)*(fbPage(pool->fbpool, cnt).obj->inList[0]));
+      printf("FB(4).obj.inlist(1) = %lx , %lx\r\n",
+             (unsigned long)fbPage(pool->fbpool, cnt).obj->inList[1],
+             (unsigned long)*(fbPage(pool->fbpool, cnt).obj->inList[1]));
+      printf("FB(4).obj.outlist(0) = %lx\r\n",
+             (unsigned long)fbPage(pool->fbpool, cnt).obj->outList[0]);
+    }
+    if (cnt == 4)
+    {
+      printf("FB(5).obj.inlist(1) = %lx , %lx\r\n",
+             (unsigned long)fbPage(pool->fbpool, cnt).obj->inList[1],
+             (unsigned long)*(fbPage(pool->fbpool, cnt).obj->inList[1]));
     }
   }
+
+  //4.連結
+  printf("Link FBs according to linkTable . v2\r\n");
+  linkLinkTable(pool->fbpool,pool->fbpoolCnt);
+  return pool;
 }
+
 // #################### 更新池子裡的FB ####################
 void updateFBS(FUNCTION_BLOCK_PAGE_t ** pool, unsigned char poolSize)
 {
@@ -168,6 +321,7 @@ void FB_ADD_INPUT_BOOL_PAGE(
   FUNCTION_BLOCK_PAGE_t ** ipool,
   unsigned char *ipoolCount)
 {
+  printf("FB_ADD_INPUT_BOOL_PAGE\r\n");
   INPUT_BOOL_t *fbobj =  malloc(sizeof(INPUT_BOOL_t));
   *fbobj = (INPUT_BOOL_t){INPUT_BOOL_updater, 0,malloc(sizeof(void **)*1),0,1,INPUT_BOOL_assignor, 0, 0};
   ((*fbobj).outList)[0] = &(fbobj->OUT);
@@ -185,6 +339,7 @@ void FB_ADD_OUTPUT_BOOL_PAGE(
   FUNCTION_BLOCK_PAGE_t ** opool,
   unsigned char *opoolCount)
 {
+  printf("FB_ADD_OUTPUT_BOOL_PAGE\r\n");
   OUTPUT_BOOL_t *fbobj =  malloc(sizeof(OUTPUT_BOOL_t));
   *fbobj = (OUTPUT_BOOL_t){OUTPUT_BOOL_updater, malloc(sizeof(void ***)*1),malloc(sizeof(void **)*1),1,1,0, 0};
   ((*fbobj).inList)[0] = (void **)&(fbobj->IN);
@@ -217,6 +372,7 @@ void _FB_ADD_IIO_PAGE(
   void (*updater)(void *iobj),
   unsigned char type)
 {
+  printf("_FB_ADD_IIO_PAGE\r\n");
   FBD_IIO_t *fbobj = malloc(sizeof(FBD_IIO_t));
   *fbobj = (FBD_IIO_t){updater,malloc(sizeof(void ***)*2),malloc(sizeof(void **)*1),2,1,0,0,0};
   ((*fbobj).inList)[0] = (void **)&(fbobj->IN1);
@@ -240,6 +396,37 @@ void dump_UPDATER()
   printf("(0x%lx)LOGIC_XOR_updater\r\n",(unsigned long)LOGIC_XOR_updater);
   printf("(0x%lx)LOGIC_XNOR_updater\r\n",(unsigned long)LOGIC_XNOR_updater);
 }
+
+
+void dump_IO(FUNCTION_BLOCK_PAGE_t ** ipool, unsigned char icount, FUNCTION_BLOCK_PAGE_t ** opool, unsigned char ocount)
+{
+  unsigned char i;
+  printf("\tIN : ");
+  for(i=0;i<icount;i++){
+    if(fbPage(ipool,i).type == bt_Input_Bool){
+      INPUT_BOOL_t** objptr = (INPUT_BOOL_t**)&(fbPage(ipool,i).obj);
+      printf("%d  ",(**objptr).IN);
+    }
+    if(fbPage(ipool,i).type == bt_Input_Real){
+      INPUT_REAL_t** objptr = (INPUT_REAL_t**)&(fbPage(ipool,i).obj);
+      printf("%f  ",(**objptr).IN);
+    }
+  }
+
+  printf("  OUT : ");
+  for(i=0;i<ocount;i++){
+    if(fbPage(opool,i).type == bt_Output_Bool){
+      OUTPUT_BOOL_t** objptr = (OUTPUT_BOOL_t**)&(fbPage(opool,i).obj);
+      printf("%d  ",(**objptr).OUT);
+    }
+    if(fbPage(opool,i).type == bt_Output_Real){
+      OUTPUT_REAL_t** objptr = (OUTPUT_REAL_t**)&(fbPage(opool,i).obj);
+      printf("%f  ",(**objptr).OUT);
+    }
+  }
+  printf("\r\n");
+}
+
 
 void dump_INPUT(FUNCTION_BLOCK_PAGE_t ** pool, unsigned char count)
 {

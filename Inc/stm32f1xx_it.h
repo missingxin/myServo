@@ -57,7 +57,7 @@ void DebugMon_Handler(void);
 void PendSV_Handler(void);
 void SysTick_Handler(void);
 void TIM2_IRQHandler(void);
-
+void device_timer_callback();
 #ifdef __cplusplus
 }
 #endif

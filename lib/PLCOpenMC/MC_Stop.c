@@ -75,8 +75,9 @@ void FB_ADD_MC_STOP_PAGE(
   FUNCTION_BLOCK_PAGE_t ** fpool,
   unsigned char *fpoolCount)
 {
+  printf("FB_ADD_MC_STOP_PAGE\r\n");
   MC_Stop_t *fbobj =  malloc(sizeof(MC_Stop_t));
-  *fbobj = (MC_Stop_t){MC_Home_updater, 
+  *fbobj = (MC_Stop_t){MC_Stop_updater, 
   malloc(sizeof(void ***)*4),  //C inList
   malloc(sizeof(void **)*6),   //C outList
   4, //C  inNumber

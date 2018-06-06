@@ -66,24 +66,24 @@ struct AXIS_t{
                                         BOOL enablePositive,  
                                         BOOL enableNegative );
 //######### 需要額外實作的功能 ####################
-  unsigned char (*callStop)(  AXIS_t * axis, 
+  PowerControlResult_t (*callStop)(  AXIS_t * axis, 
                           BOOL doing,
                           REAL acceleration,
                           REAL jerk);
 
 //######### 需要額外實作的功能 ####################
-  unsigned char (*callHome)(  AXIS_t * axis, 
+  PowerControlResult_t (*callHome)(  AXIS_t * axis, 
                             BOOL doing,
                             REAL position);
 //######### 需要額外實作的功能 ####################
-  unsigned char (*callHalt)(  AXIS_t * axis, 
+  PowerControlResult_t (*callHalt)(  AXIS_t * axis, 
                           BOOL doing,
                           REAL accelerateion,
                           REAL jerk );
 
 //######### 需要額外實作的功能 ####################
-  unsigned char (*callMoveAbs)( AXIS_t * axis, 
-                            BOOL doing,
+  PowerControlResult_t (*callMoveAbs)( AXIS_t * axis, 
+                            BOOL busy,
                             BOOL continuousUpdate,
                             REAL position,
                             REAL velocity,
@@ -112,5 +112,16 @@ void FB_ADD_AXIS_PAGE(
   FUNCTION_BLOCK_PAGE_t ** fpool,
   unsigned char *fpoolCount);
 
-
+PowerControlResult_t axisDoPower( AXIS_t * axis, BOOL enable,
+        BOOL enablePositive, BOOL enableNegative );
+PowerControlResult_t axisDoStop(AXIS_t * axis,  BOOL doing, 
+        REAL acceleration, REAL jerk);
+PowerControlResult_t axisDoHome(AXIS_t * axis,  BOOL doing, 
+        REAL position);
+PowerControlResult_t axisDoHalt(AXIS_t * axis,  BOOL doing, 
+        REAL accelerateion, REAL jerk);
+PowerControlResult_t axisDoMoveAbs(AXIS_t * axis,  BOOL busy,
+        BOOL continuousUpdate, REAL position, REAL velocity,
+        REAL Acceleration, REAL Deceleration, REAL Jerk,
+        MC_DIRECTION_t direction);
 #endif //__AXIS_H__

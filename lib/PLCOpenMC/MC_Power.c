@@ -15,8 +15,9 @@
 void MC_Power_updater(void *iobj){
   MC_Power_t* obj;
   obj = (MC_Power_t*) iobj;
-  //handle input
-  PowerControlResult_t pcResult = obj->Axis->callPower(obj->Axis, *(obj->Enable), *(obj->EnablePositive), *(obj->EnableNegative));
+  //handle input.Axis->callPower);
+  
+  PowerControlResult_t pcResult = (*obj).Axis->callPower(obj->Axis, *(obj->Enable), *(obj->EnablePositive), *(obj->EnableNegative));
   switch (pcResult){
     case(PowerControl_Done):{
       //完成
@@ -49,6 +50,7 @@ void MC_Power_updater(void *iobj){
       break;
     }
   }
+  
   //Power enabled 由高轉低時，除了ErrorStop外的其他狀態全都轉移到Disabled
   //正在跑的FB要變成 CommandAborted                     >>> Note2 <<<
   if ( *(obj->Enable) == FALSE && obj->prevEnable == TRUE){
@@ -65,6 +67,7 @@ void FB_ADD_MC_POWER_PAGE(
   FUNCTION_BLOCK_PAGE_t ** fpool,
   unsigned char *fpoolCount)
 {
+  printf("FB_ADD_MC_POWER_PAGE\r\n");
   MC_Power_t *fbobj =  malloc(sizeof(MC_Power_t));
   *fbobj = (MC_Power_t){MC_Power_updater, 
   malloc(sizeof(void ***)*4),  //C inList
