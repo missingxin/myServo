@@ -127,7 +127,7 @@ PowerControlResult_t axisDoMoveAbs(AXIS_t * axis,
       printf("  ======== simulator :: AXIS DONE MOVE ABS (to %f)!!!!!!!!!!! ======== \r\n",position);
       return PowerControl_Done;    
     }else{
-      printf("  ======== simulator :: AXIS DOING MOVE ABS ======== \r\n");
+      //printf("  ======== simulator :: AXIS DOING MOVE ABS ======== \r\n");
       return PowerControl_Doing;
     }
   }

@@ -105,13 +105,7 @@ void linkLinkTable(FUNCTION_BLOCK_PAGE_t ** pool, unsigned char poolSize)
       unsigned char theirFB  = thisLink->theirFBIDX;
       unsigned char theirOut = thisLink->theirOutPinIDX;
       FUNCTION_BLOCK_PAGE_t **thatPage = &(*(pool + theirFB));
-      printf("linking %d %d %d %d\r\n", fbid, ourIn, theirFB, theirOut);
       *((**thisPage).obj->inList[ourIn]) = (**thatPage).obj->outList[theirOut];
-      printf("0x%lx, ", (unsigned long)&((**thisPage).obj->inList[ourIn]));
-      printf("0x%lx, ", (unsigned long) ((**thisPage).obj->inList[ourIn]));
-      printf("0x%lx, ", (unsigned long)*((**thisPage).obj->inList[ourIn]));
-      printf("0x%lx, ", (unsigned long)&((**thatPage).obj->outList[theirOut]));
-      printf("0x%lx,\r\n", (unsigned long)((**thatPage).obj->outList[theirOut]));
     }
   }
 }
@@ -243,43 +237,8 @@ FUNCTION_BLOCK_POOL_t* setLinkTable2(unsigned char *rule){
     {
       fbPage(pool->fbpool, cnt).inLinkTable = malloc(sizeof(FB_INPUT_LINK_t) * linkTableLength);
       memcpy(fbPage(pool->fbpool, cnt).inLinkTable, (FB_INPUT_LINK_t *)&(rule[offset + 2]), sizeof(FB_INPUT_LINK_t) * linkTableLength);
-      int i;
-      printf(" FB(%d) : ", cnt);
-      for (i = 0; i < linkTableLength; i++)
-      {
-        printf("{ %d, %d, %d } , ",
-               fbPage(pool->fbpool, cnt).inLinkTable[i].ourInPinIDX,
-               fbPage(pool->fbpool, cnt).inLinkTable[i].theirFBIDX,
-               fbPage(pool->fbpool, cnt).inLinkTable[i].theirOutPinIDX);
-      }
-      printf("(cnt = %d)\r\n", linkTableLength);
     }
     offset = offset + 2 + rule[offset+1]*3;
-
-    if (cnt == 3)
-    {
-      printf("FB(3).obj.outlist(1) = %lx\r\n",
-             (unsigned long)fbPage(pool->fbpool, cnt).obj->outList[1]);
-      printf("FB(3).obj.outlist(2) = %lx\r\n",
-             (unsigned long)fbPage(pool->fbpool, cnt).obj->outList[2]);
-    }
-    if (cnt == 4)
-    {
-      printf("FB(4).obj.inlist(0) = %lx , %lx\r\n",
-             (unsigned long)fbPage(pool->fbpool, cnt).obj->inList[0],
-             (unsigned long)*(fbPage(pool->fbpool, cnt).obj->inList[0]));
-      printf("FB(4).obj.inlist(1) = %lx , %lx\r\n",
-             (unsigned long)fbPage(pool->fbpool, cnt).obj->inList[1],
-             (unsigned long)*(fbPage(pool->fbpool, cnt).obj->inList[1]));
-      printf("FB(4).obj.outlist(0) = %lx\r\n",
-             (unsigned long)fbPage(pool->fbpool, cnt).obj->outList[0]);
-    }
-    if (cnt == 4)
-    {
-      printf("FB(5).obj.inlist(1) = %lx , %lx\r\n",
-             (unsigned long)fbPage(pool->fbpool, cnt).obj->inList[1],
-             (unsigned long)*(fbPage(pool->fbpool, cnt).obj->inList[1]));
-    }
   }
 
   //4.連結
