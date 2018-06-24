@@ -50,7 +50,7 @@ typedef enum {
   bt_Logic_Nor,
   bt_Logic_Xor,
   bt_Logic_Xnor,
-  bt_Input_Real,
+  bt_Input_Real, //9
   bt_Output_Real,
   bt_Input_Axis,  //取得實體Axis
   bt_MC_Power,
@@ -210,5 +210,7 @@ void _FB_ADD_IIO_PAGE(
   void (*updater)(void *iobj),
   unsigned char type);
 
+void dump_FBPool(FUNCTION_BLOCK_PAGE_t **pool, unsigned char icount);
+void dump_FBObjIOPoint(FUNCTION_BLOCK_t *obj);
 
 #endif //__PLCLOGIC_H__

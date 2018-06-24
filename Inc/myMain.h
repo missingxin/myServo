@@ -15,6 +15,8 @@
 /* Includes ------------------------------------------------------------------*/
 #ifndef __MYMAIN_H__
 #define __MYMAIN_H__
+#include "PLCLogic.h"
+#include "FBDprotocol.h"
 /* Private typedef -----------------------------------------------------------*/
 #define PWM_Period 60000
 /* Private define ------------------------------------------------------------*/
@@ -23,5 +25,12 @@
 /* Private function prototypes -----------------------------------------------*/
 void myMain();
 void device_init();
+void protocol_init(FUNCTION_BLOCK_POOL_t **pool);
+void device_timer_callback();
+void cb_set_graph(packet_t *packet);
+void cb_push_input(packet_t *packet);
+void tim2_callback();
+void ur1_callback();
+void protocol_rx_byte_in(unsigned char);
 /* Private functions ---------------------------------------------------------*/
 #endif

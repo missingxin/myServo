@@ -1,0 +1,47 @@
+<RCC>
+    <qresource prefix="/icons">
+        <file>icon/broken-link (1).png</file>
+        <file>icon/broken-link.png</file>
+        <file>icon/folder (1).png</file>
+        <file>icon/folder (2).png</file>
+        <file>icon/folder (3).png</file>
+        <file>icon/folder.png</file>
+        <file>icon/garbage1.png</file>
+        <file>icon/garbage2.png</file>
+        <file>icon/icon.ico</file>
+        <file>icon/link (1).png</file>
+        <file>icon/link.png</file>
+        <file>icon/link-symbol (1).png</file>
+        <file>icon/link-symbol (2).png</file>
+        <file>icon/link-symbol (3).png</file>
+        <file>icon/link-symbol.png</file>
+        <file>icon/magnifier-and-mark-help (1).png</file>
+        <file>icon/magnifier-and-mark-help (2).png</file>
+        <file>icon/magnifier-and-mark-help (3).png</file>
+        <file>icon/magnifier-and-mark-help.png</file>
+        <file>icon/mindmap (1).png</file>
+        <file>icon/mindmap (2).png</file>
+        <file>icon/mindmap (3).png</file>
+        <file>icon/mindmap.png</file>
+        <file>icon/pause (1).png</file>
+        <file>icon/pause (3).png</file>
+        <file>icon/pause.png</file>
+        <file>icon/play-button.png</file>
+        <file>icon/resize-option (1).png</file>
+        <file>icon/resize-option (2).png</file>
+        <file>icon/resize-option (3).png</file>
+        <file>icon/resize-option.png</file>
+        <file>icon/save.png</file>
+        <file>icon/settings.png</file>
+        <file>icon/stop (1).png</file>
+        <file>icon/stop (2).png</file>
+        <file>icon/stop.png</file>
+        <file>icon/unlink (1).png</file>
+        <file>icon/unlink (2).png</file>
+        <file>icon/unlink.png</file>
+        <file>icon/unlink-symbol (1).png</file>
+        <file>icon/unlink-symbol (2).png</file>
+        <file>icon/unlink-symbol (3).png</file>
+        <file>icon/unlink-symbol.png</file>
+    </qresource>
+</RCC>

@@ -221,7 +221,10 @@ FUNCTION_BLOCK_POOL_t* setLinkTable2(unsigned char *rule){
     }
     offset = offset + 2 + rule[offset+1]*3;
   }
-  
+  (*pool).ipoolCnt = INPUT_cnt;
+  (*pool).opoolCnt = OUTPUT_cnt;
+  (*pool).fbpoolCnt = FBP_cnt;
+
   //3.建立連結表
   printf("Create LinkTable . v2\r\n");
   offset = 3;
@@ -357,106 +360,157 @@ void dump_UPDATER()
 }
 
 
-void dump_IO(FUNCTION_BLOCK_PAGE_t ** ipool, unsigned char icount, FUNCTION_BLOCK_PAGE_t ** opool, unsigned char ocount)
+//打印出IO狀態，用來呈現類似監看IO時序圖的效果
+void dump_IO(FUNCTION_BLOCK_PAGE_t **ipool, unsigned char icount, FUNCTION_BLOCK_PAGE_t **opool, unsigned char ocount)
 {
   unsigned char i;
   printf("\tIN : ");
-  for(i=0;i<icount;i++){
-    if(fbPage(ipool,i).type == bt_Input_Bool){
-      INPUT_BOOL_t** objptr = (INPUT_BOOL_t**)&(fbPage(ipool,i).obj);
-      printf("%d  ",(**objptr).IN);
+  for (i = 0; i < icount; i++)
+  {
+    if (fbPage(ipool, i).type == bt_Input_Bool)
+    {
+      INPUT_BOOL_t **objptr = (INPUT_BOOL_t **)&(fbPage(ipool, i).obj);
+      printf("%d  ", (**objptr).IN);
     }
-    if(fbPage(ipool,i).type == bt_Input_Real){
-      INPUT_REAL_t** objptr = (INPUT_REAL_t**)&(fbPage(ipool,i).obj);
-      printf("%f  ",(**objptr).IN);
+    if (fbPage(ipool, i).type == bt_Input_Real)
+    {
+      INPUT_REAL_t **objptr = (INPUT_REAL_t **)&(fbPage(ipool, i).obj);
+      printf("%f  ", (**objptr).IN);
     }
   }
 
   printf("  OUT : ");
-  for(i=0;i<ocount;i++){
-    if(fbPage(opool,i).type == bt_Output_Bool){
-      OUTPUT_BOOL_t** objptr = (OUTPUT_BOOL_t**)&(fbPage(opool,i).obj);
-      printf("%d  ",(**objptr).OUT);
+  for (i = 0; i < ocount; i++)
+  {
+    if (fbPage(opool, i).type == bt_Output_Bool)
+    {
+      OUTPUT_BOOL_t **objptr = (OUTPUT_BOOL_t **)&(fbPage(opool, i).obj);
+      printf("%d  ", (**objptr).OUT);
     }
-    if(fbPage(opool,i).type == bt_Output_Real){
-      OUTPUT_REAL_t** objptr = (OUTPUT_REAL_t**)&(fbPage(opool,i).obj);
-      printf("%f  ",(**objptr).OUT);
+    if (fbPage(opool, i).type == bt_Output_Real)
+    {
+      OUTPUT_REAL_t **objptr = (OUTPUT_REAL_t **)&(fbPage(opool, i).obj);
+      printf("%f  ", (**objptr).OUT);
     }
   }
   printf("\r\n");
 }
 
+//用來看INPUT FB的值用的，底下那個dump_FBPool我沒特別打印出值來
+void dump_INPUT(FUNCTION_BLOCK_PAGE_t **pool, unsigned char count)
+{
+  printf("Dumping input:\r\n");
+  unsigned char i;
+  for (i = 0; i < count; i++)
+  {
+    if (fbPage(pool, i).type == bt_Input_Bool)
+    {
+      INPUT_BOOL_t **objptr = (INPUT_BOOL_t **)&(fbPage(pool, i).obj);
+      printf("\tIN[%d] : (BOOL)%d \r\n", i, (**objptr).IN);
+    }
+    if (fbPage(pool, i).type == bt_Input_Real)
+    {
+      INPUT_REAL_t **objptr = (INPUT_REAL_t **)&(fbPage(pool, i).obj);
+      printf("\tIN[%d] : (REAL)%f \r\n", i, (**objptr).IN);
+    }
+  }
+  printf("\r\n");
+}
 
-void dump_INPUT(FUNCTION_BLOCK_PAGE_t ** pool, unsigned char count)
+//用來看OUTPUT FB的值用的，底下那個dump_FBPool我沒特別打印出值來
+void dump_OUTPUT(FUNCTION_BLOCK_PAGE_t **pool, unsigned char count)
 {
   printf("Dumping output:\r\n");
   unsigned char i;
-  for(i=0;i<count;i++){
-    if(fbPage(pool,i).type == bt_Input_Bool){
-      INPUT_BOOL_t** objptr = (INPUT_BOOL_t**)&(fbPage(pool,i).obj);
-      printf("\tIN[%d] : (BOOL)%d \r\n",i,(**objptr).IN);
+  for (i = 0; i < count; i++)
+  {
+    if (fbPage(pool, i).type == bt_Output_Bool)
+    {
+      OUTPUT_BOOL_t **objptr = (OUTPUT_BOOL_t **)&(fbPage(pool, i).obj);
+      printf("\tOUT[%d] : (BOOL)%d \r\n", i, (**objptr).OUT);
     }
-    if(fbPage(pool,i).type == bt_Input_Real){
-      INPUT_REAL_t** objptr = (INPUT_REAL_t**)&(fbPage(pool,i).obj);
-      printf("\tIN[%d] : (REAL)%f \r\n",i,(**objptr).IN);
-    }
-  }
-  printf("\r\n");
-}
-void dump_OUTPUT(FUNCTION_BLOCK_PAGE_t ** pool, unsigned char count)
-{
-  printf("Dumping output:\r\n");
-  unsigned char i;
-  for(i=0;i<count;i++){
-    if(fbPage(pool,i).type == bt_Output_Bool){
-      OUTPUT_BOOL_t** objptr = (OUTPUT_BOOL_t**)&(fbPage(pool,i).obj);
-      printf("\tOUT[%d] : (BOOL)%d \r\n",i,(**objptr).OUT);
-    }
-    if(fbPage(pool,i).type == bt_Output_Real){
-      OUTPUT_REAL_t** objptr = (OUTPUT_REAL_t**)&(fbPage(pool,i).obj);
-      printf("\tOUT[%d] : (REAL)%f \r\n",i,(**objptr).OUT);
+    if (fbPage(pool, i).type == bt_Output_Real)
+    {
+      OUTPUT_REAL_t **objptr = (OUTPUT_REAL_t **)&(fbPage(pool, i).obj);
+      printf("\tOUT[%d] : (REAL)%f \r\n", i, (**objptr).OUT);
     }
   }
   printf("\r\n");
 }
 
-void dump_PAGE(FUNCTION_BLOCK_PAGE_t ** fpool, unsigned char count)
+
+//看ptr，檢查有沒有連錯用的
+void dump_FBPool(FUNCTION_BLOCK_PAGE_t **pool, unsigned char cnt)
 {
-  printf("Pool : 0x%lx\r\n",(unsigned long)fpool);
+  unsigned char fbid;
+  for (fbid = 0; fbid < cnt; fbid++)
+  {
+    FUNCTION_BLOCK_PAGE_t **thisPage = &(*(pool + fbid));
+    FUNCTION_BLOCK_t *obj = (**thisPage).obj;
+    printf("fbid = %d/%d ; type = %d ; addr = 0x%lx) \r\n", fbid, cnt - 1, (**thisPage).type, (unsigned long)&(**thisPage).obj);
+    unsigned int i = 0;
+    for (i = 0; i < obj->inNumber; i++)
+    {
+      printf("\t\t\t in point %d = 0x%lx ; 0x%lx ; 0x%lx ;\r\n", i,
+             (unsigned long)&(*(obj->inList + i)),
+             (unsigned long)(*(obj->inList + i)),
+             (unsigned long)*(*(obj->inList + i)));
+    }
+    for (i = 0; i < obj->outNumber; i++)
+    {
+      printf("\t\t\tout point %d = 0x%lx ; 0x%lx ;\r\n", i,
+             (unsigned long)&(*(obj->outList + i)),
+             (unsigned long)(*(obj->outList + i)));
+    }
+  }
+};
+//最早用來 dump PAGE的東西，格式需要修正，或把上面這幾個都整一整
+void dump_PAGE(FUNCTION_BLOCK_PAGE_t **fpool, unsigned char count)
+{
+  printf("Pool : 0x%lx\r\n", (unsigned long)fpool);
   unsigned char i;
-  for(i=0;i<count;i++){
-    FUNCTION_BLOCK_PAGE_t** thisPage = &(*(fpool+i));
+  for (i = 0; i < count; i++)
+  {
+    FUNCTION_BLOCK_PAGE_t **thisPage = &(*(fpool + i));
     // printf("(0x%lx)Pool[%d] : 0x%lx\r\n\t(0x%lx)obj : \r\n\t\t(0x%lx)updater\r\n",(unsigned long)thisPage,i, (unsigned long)*thisPage, (unsigned long) (**thisPage).obj, (unsigned long) (**thisPage).obj->updater );
     unsigned char inidx;
-    
-    for(inidx = 0;inidx<(**thisPage).obj->outNumber;inidx++){
-      void ** thisOut = &(*((**thisPage).obj->outList+inidx));
+
+    for (inidx = 0; inidx < (**thisPage).obj->outNumber; inidx++)
+    {
+      void **thisOut = &(*((**thisPage).obj->outList + inidx));
       unsigned char *a;
       a = *thisOut;
-      printf("\t\t\t(0x%lx)outList[%d] : 0x%lx = %d\r\n",(unsigned long)thisOut,inidx,(unsigned long)*thisOut, (unsigned char)*a);
+      printf("\t\t\t(0x%lx)outList[%d] : 0x%lx = %d\r\n", (unsigned long)thisOut, inidx, (unsigned long)*thisOut, (unsigned char)*a);
     }
-    printf("\t\t(0x%lx)type : %d\r\n",(unsigned long)&((**thisPage).type),(**thisPage).type);
-    if((**thisPage).type == bt_Input_Bool){
+    printf("\t\t(0x%lx)type : %d\r\n", (unsigned long)&((**thisPage).type), (**thisPage).type);
+    if ((**thisPage).type == bt_Input_Bool)
+    {
       //input
       INPUT_BOOL_t **objptr = (INPUT_BOOL_t **)&((**thisPage).obj);
-      printf("\t\t(0x%lx)IN : %d\r\n",(unsigned long)&((**objptr).IN),(**objptr).IN);
-      printf("\t\t(0x%lx)OUT : %d\r\n",(unsigned long)&((**objptr).OUT),(**objptr).OUT);
-    }else if((**thisPage).type == bt_Output_Bool){
+      printf("\t\t(0x%lx)IN : %d\r\n", (unsigned long)&((**objptr).IN), (**objptr).IN);
+      printf("\t\t(0x%lx)OUT : %d\r\n", (unsigned long)&((**objptr).OUT), (**objptr).OUT);
+    }
+    else if ((**thisPage).type == bt_Output_Bool)
+    {
       //input
       OUTPUT_BOOL_t **objptr = (OUTPUT_BOOL_t **)&((**thisPage).obj);
-      printf("\t\t(0x%lx)IN1 : 0x%lx = %d\r\n",(unsigned long)&((**objptr).IN),(unsigned long)(**objptr).IN, *((**objptr).IN));
-      printf("\t\t(0x%lx)OUT : %d\r\n",(unsigned long)&((**objptr).OUT),(**objptr).OUT);
-    }else if((**thisPage).type == bt_Logic_Not){
+      printf("\t\t(0x%lx)IN1 : 0x%lx = %d\r\n", (unsigned long)&((**objptr).IN), (unsigned long)(**objptr).IN, *((**objptr).IN));
+      printf("\t\t(0x%lx)OUT : %d\r\n", (unsigned long)&((**objptr).OUT), (**objptr).OUT);
+    }
+    else if ((**thisPage).type == bt_Logic_Not)
+    {
       //input
       FBD_NOT_t **objptr = (FBD_NOT_t **)&((**thisPage).obj);
-      printf("\t\t(0x%lx)IN1 : 0x%lx = %d\r\n",(unsigned long)&((**objptr).IN),(unsigned long)(**objptr).IN, *((**objptr).IN));
-      printf("\t\t(0x%lx)OUT : %d\r\n",(unsigned long)&((**objptr).OUT),(**objptr).OUT);
-    }else if((**thisPage).type >= bt_Logic_And && (**thisPage).type <= bt_Logic_Xnor){
+      printf("\t\t(0x%lx)IN1 : 0x%lx = %d\r\n", (unsigned long)&((**objptr).IN), (unsigned long)(**objptr).IN, *((**objptr).IN));
+      printf("\t\t(0x%lx)OUT : %d\r\n", (unsigned long)&((**objptr).OUT), (**objptr).OUT);
+    }
+    else if ((**thisPage).type >= bt_Logic_And && (**thisPage).type <= bt_Logic_Xnor)
+    {
       //and
       FBD_AND_t **objptr = (FBD_AND_t **)&((**thisPage).obj);
-      printf("\t\t(0x%lx)IN1 : 0x%lx = %d\r\n",(unsigned long)&((**objptr).IN1),(unsigned long)(**objptr).IN1, *((**objptr).IN1));
-      printf("\t\t(0x%lx)IN2 : 0x%lx = %d\r\n",(unsigned long)&((**objptr).IN2),(unsigned long)(**objptr).IN2, *((**objptr).IN2));
-      printf("\t\t(0x%lx)OUT : %d\r\n",(unsigned long)&((**objptr).OUT),(**objptr).OUT);
+      printf("\t\t(0x%lx)IN1 : 0x%lx = %d\r\n", (unsigned long)&((**objptr).IN1), (unsigned long)(**objptr).IN1, *((**objptr).IN1));
+      printf("\t\t(0x%lx)IN2 : 0x%lx = %d\r\n", (unsigned long)&((**objptr).IN2), (unsigned long)(**objptr).IN2, *((**objptr).IN2));
+      printf("\t\t(0x%lx)OUT : %d\r\n", (unsigned long)&((**objptr).OUT), (**objptr).OUT);
     }
   }
 }
